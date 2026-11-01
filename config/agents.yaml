@@ -1,0 +1,332 @@
+# =====================================================================
+# Agent registry: the harness loads this file to build every agent.
+# kind:  llm    = a Claude agent loop with an allow-listed tool set
+#        hybrid = deterministic code produces candidates/numbers, Claude judges
+#        code   = no model involved (deterministic service)
+# Every LLM agent:
+#   * reads ONLY through the read-only tools listed (cache-first data layer)
+#   * returns ONE structured output validated against contracts/research_report.schema.json
+#     (or the contract named in `writes`)
+#   * cites evidence for every number (series_id + obs_date + value, metric_id or doc_id)
+# Status: DESIGN DRAFT.
+# =====================================================================
+defaults:
+  model: claude-opus-5-5          # one model, effort tuned per agent (see OPEN_QUESTIONS Q9 for a cheaper triage tier)
+  thinking: adaptive
+  effort: medium
+  max_tool_calls: 40
+  max_attempts: 3                 # first try + 2 remediation retries
+  step_timeout_s: 600
+  step_budget_usd: 2.50
+  context_pack_max_tokens: 30000
+  refusal_fallbacks: default      # server-side fallback enabled on the API request
+  history: append_only            # remediation is appended as a new turn, never edits history
+
+tool_groups:
+  read_core:     [get_series_summary, get_series, get_derived_metric, compute_stats,
+                  get_calendar, get_prior_reports, get_lessons, request_data]
+  read_markets:  [get_prices, get_futures_curve, get_vol_metrics]
+  read_docs:     [search_documents, get_geo_events]
+  web:           [web_search, web_fetch]          # server tools, allow-listed domains, results auto-archived
+  portfolio:     [get_portfolio_state, get_target_exposures]
+  options_math:  [get_option_chain, price_option, generate_candidates, size_position]
+  risk_engine:   [run_stress, check_policy]
+
+agents:
+  # ------------------------------ Layer 0: data plane --------------------------
+  - id: data_steward
+    name: Data Steward
+    layer: data
+    kind: code
+    mission: >-
+      The only component that talks to external data APIs. Builds the due-list from
+      ref.series.next_due_at, fetches only deltas, hashes and archives raw payloads,
+      writes point-in-time observations, recomputes derived metrics, publishes a
+      freshness report. Re-running it twice in a row downloads nothing.
+    cadence: [daily_06:30_ET, daily_17:30_ET, pre_ic_run, on_request_data_queue]
+    writes: [raw.fetch_log, raw.blob, mkt.*, research.derived_metric, freshness_report]
+
+  # ------------------------------ Layer 1: research desk -----------------------
+  - id: liquidity
+    name: Global Liquidity & Dollar
+    layer: research
+    kind: llm
+    effort: medium
+    tools: [read_core, read_markets]
+    mission: >-
+      Is global liquidity expanding or contracting, how fast, and is the dollar a
+      headwind? Track US net liquidity (Fed assets - TGA - RRP), reserves, ECB/BoJ/PBoC
+      balance sheets in USD, broad dollar, financial-conditions indices, and funding
+      stress (SOFR vs IORB). Output a liquidity score (-3..+3) and its 13-week impulse.
+    key_questions:
+      - "13-week change in US net liquidity and global CB liquidity (USD)?"
+      - "Upcoming drains: Treasury refunding / TGA rebuild, QT pace, RRP depletion?"
+      - "Is the dollar tightening conditions for EM and commodities?"
+    writes: research_report
+
+  - id: rates_credit
+    name: Rates, Central Banks & Credit
+    layer: research
+    kind: llm
+    effort: medium
+    tools: [read_core, read_markets, read_docs, web]
+    mission: >-
+      Where is the policy rate going versus what the market prices? Fed funds and the
+      futures-implied path, curve shape (2s10s, 3m10y), real yields, breakevens, term
+      premium, IG/HY spreads, plus ECB/BoJ/BoE/PBoC stance. Owns the hurdle rate the
+      whole fund is measured against.
+    key_questions:
+      - "Market-implied cuts/hikes over 6 and 12 months vs our base case?"
+      - "Is the curve steepening for good (growth/inflation) or bad (term premium) reasons?"
+      - "Are credit spreads confirming or contradicting equity strength?"
+    writes: research_report
+
+  - id: macro_cycle
+    name: Growth & Inflation Nowcast
+    layer: research
+    kind: llm
+    effort: medium
+    tools: [read_core, read_docs]
+    mission: >-
+      Produce the two axes of the regime map: a growth score and an inflation score
+      (level + second derivative) for the US, Eurozone, China, Japan and EM, from
+      claims, payrolls, Sahm rule, GDPNow, OECD CLIs, regional Fed surveys, CPI/PCE
+      momentum (3m annualized vs 12m) and inflation expectations. Uses only vintage data
+      known at as_of.
+    writes: research_report
+
+  - id: geopolitics
+    name: Geopolitics & Policy Risk
+    layer: research
+    kind: llm
+    effort: high
+    tools: [read_core, read_docs, web]
+    mission: >-
+      Maintain the geopolitical risk register (research.geo_event): conflicts, sanctions,
+      tariffs, elections, chokepoints (Hormuz, Red Sea/Bab-el-Mandeb, Taiwan Strait,
+      Panama, Black Sea). For each: probability, severity, transmission channel
+      (oil supply, shipping, semis, food, USD, risk-off) and affected sleeves. Anchored
+      by the GPR and EPU indices; every event cites primary or tier-1 sources.
+    key_questions:
+      - "Which events could move crude +/-20% or equities -10% inside 45 days?"
+      - "What is priced (OVX, skew, GPR) versus what is not?"
+    writes: research_report + research.geo_event
+
+  - id: supply_chain
+    name: Global Supply Chain & Trade
+    layer: research
+    kind: llm
+    effort: medium
+    tools: [read_core, read_docs, web]
+    mission: >-
+      Are goods pipelines loosening or tightening? NY Fed GSCPI, container freight
+      (Drewry WCI, Freightos), inventories-to-sales, supplier-delivery components,
+      tariff/trade-policy changes, semiconductor and critical-mineral bottlenecks.
+      Translate into inflation pressure (feeds macro_cycle) and sector winners/losers.
+    writes: research_report
+
+  - id: energy
+    name: Crude Oil & Natural Gas
+    layer: research
+    kind: llm
+    effort: medium
+    tools: [read_core, read_markets, read_docs, web]
+    mission: >-
+      Directional and volatility view on WTI/Brent and Henry Hub over 30-60 days:
+      inventories vs 5-year range, Cushing, production, futures curve structure
+      (backwardation = tight), OPEC+ policy, COT positioning, OVX, weather/storage for
+      natgas, geopolitical supply risk from the geopolitics register.
+    key_questions:
+      - "Curve structure and roll yield: does it favor selling puts or calls?"
+      - "Inventory surprise vs seasonal norm (z-score)?"
+      - "Where are crowded positions (COT extremes)?"
+    writes: research_report
+
+  - id: metals
+    name: Gold & Silver
+    layer: research
+    kind: llm
+    effort: medium
+    tools: [read_core, read_markets, read_docs, web]
+    mission: >-
+      Gold and silver view: real yields and USD (classic drivers), central-bank buying,
+      ETF holdings, COT positioning, gold/silver ratio, GVZ, and the silver industrial
+      demand leg (solar, electronics). Flag when gold trades off its real-rate model
+      (regime of central-bank/geopolitical demand).
+    writes: research_report
+
+  - id: us_equity
+    name: US Equities
+    layer: research
+    kind: llm
+    effort: medium
+    tools: [read_core, read_markets]
+    mission: >-
+      S&P 500, Nasdaq-100 and Russell 2000: trend and breadth, earnings revisions,
+      equity risk premium versus real yields, concentration risk, credit confirmation,
+      and positioning. Consumes the valuation agent's CAPE percentiles; does not
+      recompute them.
+    writes: research_report
+
+  - id: intl_equity
+    name: International Equities
+    layer: research
+    kind: llm
+    effort: medium
+    tools: [read_core, read_markets, read_docs]
+    mission: >-
+      Developed ex-US (Europe, Japan) and EM (China, India, Brazil): relative strength
+      vs SPX, local policy (ECB, BoJ, PBoC stimulus), currency effects (USD/JPY carry,
+      broad USD), earnings, valuation gap vs US from the valuation agent. Picks which
+      international ETFs are best to sell puts or calls on.
+    writes: research_report
+
+  - id: valuation
+    name: Valuation & CAPE
+    layer: research
+    kind: hybrid
+    effort: low
+    tools: [read_core]
+    mission: >-
+      Code computes; the agent interprets. CAPE for US (Shiller) and World / World ex-US
+      / EM / key countries; percentile and z-score versus trailing 10y, 20y and full
+      history; excess CAPE yield (1/CAPE - 10y real yield) so valuation is judged against
+      rates. Output a valuation modifier per sleeve that scales short-put size and strike
+      distance.
+    writes: research_report
+
+  - id: volatility
+    name: Volatility & Options Surface
+    layer: research
+    kind: hybrid
+    effort: medium
+    tools: [read_core, read_markets, options_math]
+    mission: >-
+      Where is option premium rich enough to sell? Per underlying: IV rank/percentile,
+      volatility risk premium (IV - realized), 25-delta skew, term structure (contango vs
+      backwardation), event premium around FOMC/CPI/OPEC/EIA. VIX/VIX3M, SKEW, MOVE,
+      OVX, GVZ for cross-asset stress. Ranks underlyings by premium-per-unit-of-risk.
+    writes: research_report
+
+  # ------------------------------ Layer 2: investment committee ----------------
+  - id: regime
+    name: Regime Strategist
+    layer: committee
+    kind: hybrid
+    effort: high
+    tools: [read_core, compute_regime_prior]
+    mission: >-
+      A deterministic model maps growth x inflation scores into probabilities for four
+      regimes (Goldilocks, Reflation, Stagflation, Deflationary bust) with liquidity and
+      stress overlays. The agent may shift any probability by at most +/-15 percentage
+      points, and must justify each shift with cited evidence from research reports.
+      Also estimates regime-change risk over the next 45 days.
+    writes: pm.regime_assessment
+
+  - id: cio
+    name: CIO / Portfolio Constructor
+    layer: committee
+    kind: llm
+    effort: high
+    tools: [read_core, portfolio, read_docs]
+    mission: >-
+      Turns regime + research into sleeve targets: direction (bullish -> sell puts,
+      bearish -> sell call spreads, neutral -> condors, no-edge -> stand aside),
+      conviction, beta-weighted delta target, and share of the risk budget, inside the
+      policy limits. Writes the IC memo. Must answer every red-team challenge in writing.
+      Objective: maximize expected excess return over Fed funds per unit of stress loss.
+    writes: pm.target_exposure + ic_memo
+
+  - id: red_team
+    name: Red Team
+    layer: committee
+    kind: llm
+    effort: high
+    tools: [read_core, read_markets, read_docs, risk_engine]
+    mission: >-
+      Separate context, adversarial brief: break the CIO's plan. Find the scenario that
+      hurts most, hidden correlations (everything is short vol), crowded consensus,
+      stale or cherry-picked evidence, and event risk inside the trade horizon. Must
+      produce at least three concrete challenges, each with a proposed fix.
+    writes: red_team_memo
+
+  # ------------------------------ Layer 3: implementation ----------------------
+  - id: options_structurer
+    name: Options Structurer
+    layer: implementation
+    kind: hybrid
+    effort: medium
+    tools: [read_core, portfolio, options_math, risk_engine]
+    mission: >-
+      Code generates candidate trades from live chains for each sleeve target (delta band,
+      DTE band, liquidity filters, IV-rank filter, event blackouts) with exact credit,
+      max loss, BPR, POP and Greeks. The agent chooses among candidates and sizes them to
+      the sleeve's risk budget. It cannot invent strikes or prices; only candidate_ids.
+    writes: pm.trade_proposal
+
+  - id: risk_manager
+    name: Risk Manager
+    layer: implementation
+    kind: hybrid
+    effort: medium
+    tools: [portfolio, risk_engine, read_core]
+    mission: >-
+      The policy engine (code) checks each proposal and the post-trade portfolio:
+      BPR, beta-weighted delta, vega, concentration, expiry ladder, all stress scenarios,
+      circuit breakers. A 'block' result is final; no model can override it. The agent
+      writes the risk memo for 'warn' results and can only make proposals smaller or
+      reject them.
+    writes: pm.risk_check + risk_memo
+
+  - id: execution_gateway
+    name: Execution Gateway
+    layer: implementation
+    kind: code
+    mission: >-
+      Submits only human-approved, risk-passed tickets. Paper by default. Limit orders
+      at mid with bounded price improvement, idempotency keys, fills reconciled against
+      the broker. Not reachable by any LLM tool.
+    writes: [pm.order_ticket, pm.fill, pm.position]
+
+  - id: position_monitor
+    name: Position Monitor
+    layer: implementation
+    kind: hybrid
+    effort: low
+    tools: [portfolio, read_markets, read_core, options_math]
+    mission: >-
+      Daily marks, Greeks and management triggers: 50% take-profit, 21-DTE exit,
+      2x-credit stop, short-strike delta > 0.35 defense, upcoming event blackouts,
+      assignment risk. Code fires triggers; the agent proposes close/roll tickets with
+      reasoning (they go through risk + approval like any trade).
+    cadence: [daily_16:30_ET, intraday_on_vix_jump]
+    writes: [pm.position_mark, pm.trade_proposal]
+
+  # ------------------------------ Layer 4: learning & upkeep --------------------
+  - id: performance
+    name: Performance & Post-mortem
+    layer: learning
+    kind: hybrid
+    effort: medium
+    tools: [read_core, portfolio]
+    mission: >-
+      Attribution (collateral income vs premium decay vs directional P&L vs vol P&L),
+      excess return vs Fed funds, drawdown, hit rates. Resolves falsifiable views and
+      scores each agent's calibration (Brier). Writes post-mortems for losers and
+      proposes lessons; a human accepts or rejects each lesson.
+    cadence: [weekly, monthly]
+    writes: [ops.lesson (proposed), scorecards]
+
+  - id: janitor
+    name: Harness Janitor
+    layer: learning
+    kind: llm
+    effort: low
+    tools: [read_core]
+    mission: >-
+      Garbage collection: stale or failing adapters, series that never change (TTL too
+      short), contract drift between agents.yaml and code, docs that disagree with
+      config, unused series, rising cost per run. Opens issues/PRs with small fixes;
+      never edits risk_policy.yaml.
+    cadence: [weekly]
+    writes: [maintenance_report]

@@ -1,5 +1,7 @@
 # Macro Trader
 
+> **v2 redesign in review.** An agentic macro framework (19 Claude agents in an engineered harness, a cache-first point-in-time data layer, OTM short-option implementation for a $1M book benchmarked to the Fed funds rate) is proposed in [`docs/design/DESIGN.md`](docs/design/DESIGN.md). Start with [`AGENTS.md`](AGENTS.md) for the map, [`docs/design/HARNESS.md`](docs/design/HARNESS.md) for how the harness works, and [`docs/design/OPEN_QUESTIONS.md`](docs/design/OPEN_QUESTIONS.md) for pending decisions. The v1 app described below still runs unchanged.
+
 An AI-powered macro trading analysis platform that provides personalized investment recommendations based on user risk profiles and real-time market data.
 
 ## Features

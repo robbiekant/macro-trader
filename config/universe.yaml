@@ -1,0 +1,55 @@
+# =====================================================================
+# Tradable universe + watch-only signals.
+# Phase 1 trades index/ETF options (fine-grained sizing for a $1M book);
+# futures options come in Phase 2 if the account has futures approval.
+# Why not /GC or /SI options in Phase 1: one /GC contract is 100 oz and
+# one /SI contract is 5,000 oz -> several hundred thousand $ notional each,
+# too lumpy for 10%-of-NAV position caps. GLD/SLV give ~1/10 the size.
+# =====================================================================
+sleeves:
+  us_equity_index:
+    research_agent: us_equity
+    instruments:
+      - {id: XSP, kind: index, desc: "Mini-SPX (1/10 SPX)", multiplier: 100, style: european, settlement: cash, tax_1256: true, phase: 1}
+      - {id: SPX, kind: index, desc: "S&P 500 index", multiplier: 100, style: european, settlement: cash, tax_1256: true, phase: 1}
+      - {id: QQQ, kind: etf, desc: "Nasdaq-100 ETF", multiplier: 100, style: american, settlement: etf_shares, phase: 1}
+      - {id: IWM, kind: etf, desc: "Russell 2000 ETF", multiplier: 100, style: american, settlement: etf_shares, phase: 1}
+      - {id: /ES, kind: future, desc: "E-mini S&P 500 futures options", multiplier: 50, style: american, settlement: futures, tax_1256: true, phase: 2}
+  intl_equity:
+    research_agent: intl_equity
+    instruments:
+      - {id: EFA,  kind: etf, desc: "MSCI EAFE (developed ex-US)", multiplier: 100, phase: 1}
+      - {id: EEM,  kind: etf, desc: "MSCI Emerging Markets", multiplier: 100, phase: 1}
+      - {id: FEZ,  kind: etf, desc: "Euro Stoxx 50", multiplier: 100, phase: 1}
+      - {id: EWJ,  kind: etf, desc: "MSCI Japan", multiplier: 100, phase: 1}
+      - {id: FXI,  kind: etf, desc: "China large-cap", multiplier: 100, phase: 1}
+      - {id: INDA, kind: etf, desc: "MSCI India", multiplier: 100, phase: 1}
+      - {id: EWZ,  kind: etf, desc: "MSCI Brazil", multiplier: 100, phase: 1}
+  energy:
+    research_agent: energy
+    instruments:
+      - {id: USO, kind: etf, desc: "WTI crude oil fund", multiplier: 100, phase: 1}
+      - {id: XLE, kind: etf, desc: "US energy equities", multiplier: 100, phase: 1}
+      - {id: UNG, kind: etf, desc: "US natural gas fund (defined risk only)", multiplier: 100, phase: 1}
+      - {id: /CL, kind: future, desc: "WTI crude futures options (LO)", multiplier: 1000, settlement: futures, tax_1256: true, phase: 2}
+      - {id: /NG, kind: future, desc: "Henry Hub natgas futures options (defined risk only)", multiplier: 10000, settlement: futures, tax_1256: true, phase: 2}
+  precious_metals:
+    research_agent: metals
+    instruments:
+      - {id: GLD, kind: etf, desc: "Gold trust", multiplier: 100, phase: 1}
+      - {id: SLV, kind: etf, desc: "Silver trust (defined risk only)", multiplier: 100, phase: 1}
+      - {id: /GC, kind: future, desc: "Gold futures options (OG)", multiplier: 100, settlement: futures, tax_1256: true, phase: 2}
+  rates:                                   # optional sleeve: the recession hedge
+    research_agent: rates_credit
+    instruments:
+      - {id: TLT, kind: etf, desc: "20+yr Treasuries", multiplier: 100, phase: 1}
+      - {id: /ZN, kind: future, desc: "10yr T-note futures options", multiplier: 1000, settlement: futures, tax_1256: true, phase: 2}
+
+watch_only:                                # signals the agents read; never traded
+  - {id: VIX,  why: "equity implied vol level / term structure"}
+  - {id: MOVE, why: "rates vol; cross-asset stress"}
+  - {id: DXY,  why: "global dollar liquidity"}
+  - {id: HG,   why: "copper: global growth pulse"}
+  - {id: BTC,  why: "marginal liquidity / risk appetite"}
+  - {id: USDJPY, why: "carry-trade stress (Aug-2024 style unwinds)"}
+  - {id: HYG,  why: "credit risk appetite"}

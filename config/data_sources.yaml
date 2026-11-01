@@ -1,0 +1,167 @@
+# =====================================================================
+# Data source registry + seed series catalog.
+# Only the Data Steward (deterministic code) calls these endpoints.
+# Agents read the stored copies through read-only tools.
+#
+# Cache rule (the "never download twice" contract):
+#   fetch(series) happens only if  now() >= ref.series.next_due_at
+#   next_due_at = the next scheduled release (release calendar) or
+#                 last_fetched_at + cache_ttl when no calendar exists.
+#   Only the delta since ref.series.last_obs is requested (plus a
+#   revision window for series with vintages).
+#   Identical payloads hash to the same raw.blob row and are not re-stored.
+# Status: DESIGN DRAFT. Series codes to be verified by each adapter's
+# contract test in Phase 1.
+# =====================================================================
+ttl_defaults:
+  intraday: 15m          # option chains during market hours (structuring only)
+  daily: 20h
+  weekly: 6d12h
+  monthly: 25d
+  quarterly: 80d
+  document: never        # a URL is fetched once (url_hash); "living" pages use 24h
+
+sources:
+  fred:        {name: "FRED / ALFRED (St. Louis Fed)", auth: api_key, cost: free, vintages: true,
+                use: "rates, liquidity, credit spreads, inflation, labor, financial conditions, vol indices"}
+  treasury:    {name: "US Treasury FiscalData (Daily Treasury Statement)", auth: none, cost: free,
+                use: "daily TGA balance, auction results"}
+  nyfed:       {name: "New York Fed", auth: none, cost: free,
+                use: "GSCPI supply-chain index, SOFR/EFFR, ACM term premium"}
+  eia:         {name: "US Energy Information Administration API v2", auth: api_key, cost: free,
+                use: "crude/products inventories, Cushing, production, natgas storage, STEO"}
+  cftc:        {name: "CFTC Commitments of Traders (public reporting API)", auth: none, cost: free,
+                use: "positioning in CL, NG, GC, SI, ES, ZN"}
+  cboe:        {name: "Cboe index history", auth: none, cost: free,
+                use: "VIX, VIX9D, VIX3M, VIX6M, SKEW, OVX, GVZ"}
+  shiller:     {name: "Robert Shiller online data", auth: none, cost: free,
+                use: "US CAPE (monthly, history back to 1871), real earnings"}
+  gpr:         {name: "Caldara-Iacoviello Geopolitical Risk Index", auth: none, cost: free,
+                use: "daily + monthly GPR, threats vs acts, country GPR"}
+  oecd:        {name: "OECD data API", auth: none, cost: free, use: "composite leading indicators"}
+  bis:         {name: "BIS statistics", auth: none, cost: free, use: "global liquidity indicators, USD credit to non-US"}
+  imf:         {name: "IMF data", auth: none, cost: free, use: "reserves (COFER), WEO forecasts"}
+  worldbank:   {name: "World Bank Pink Sheet", auth: none, cost: free, use: "monthly commodity prices"}
+  atlfed:      {name: "Atlanta Fed GDPNow", auth: none, cost: free, use: "real-time GDP nowcast"}
+  massive:     {name: "Massive (Polygon) market data", auth: api_key, cost: paid,
+                use: "EOD/intraday bars for indices, ETFs, FX; option chains with IV + Greeks",
+                note: "a Massive connector is already attached to your Claude account"}
+  ibkr:        {name: "Interactive Brokers", auth: broker, cost: "account",
+                use: "positions, balances, margin (BPR) what-if, option chains, paper/live orders",
+                note: "an IBKR connector is already attached to your Claude account"}
+  global_cape: {name: "Global/international CAPE provider (TBD)", auth: api_key, cost: paid,
+                use: "CAPE for ACWI, EAFE, EM and countries",
+                note: "open question: Research Affiliates / Barclays / Siblis, or computed from index EPS"}
+  web:         {name: "Claude server-side web search + fetch", auth: none, cost: "per use",
+                use: "news, central-bank statements, OPEC, freight indices (Drewry WCI, Freightos)",
+                allowed_domains: [federalreserve.gov, ecb.europa.eu, boj.or.jp, bankofengland.co.uk,
+                                  pbc.gov.cn, opec.org, iea.org, eia.gov, imf.org, bis.org,
+                                  reuters.com, apnews.com, drewry.co.uk, freightos.com, wto.org]}
+
+# Seed catalog: canonical series_id -> owner agent. ~80 series at launch.
+seed_series:
+  liquidity:                     # owner: liquidity
+    - {id: "fred:WALCL",     title: "Fed total assets", freq: weekly, critical: true}
+    - {id: "fred:WTREGEN",   title: "Treasury General Account (weekly)", freq: weekly}
+    - {id: "treasury:DTS_TGA", title: "TGA operating cash (daily)", freq: daily, critical: true}
+    - {id: "fred:RRPONTSYD", title: "Overnight reverse repo", freq: daily, critical: true}
+    - {id: "fred:WRESBAL",   title: "Bank reserve balances", freq: weekly}
+    - {id: "fred:M2SL",      title: "US M2", freq: monthly}
+    - {id: "fred:ECBASSETSW", title: "ECB total assets", freq: weekly}
+    - {id: "fred:JPNASSETS", title: "BoJ total assets", freq: monthly}
+    - {id: "fred:DTWEXBGS",  title: "Broad trade-weighted USD", freq: daily, critical: true}
+    - {id: "fred:NFCI",      title: "Chicago Fed financial conditions", freq: weekly}
+    - {id: "calc:us_net_liquidity", title: "WALCL - TGA - RRP", freq: daily, derived: true}
+    - {id: "calc:global_cb_liquidity_usd", title: "Fed+ECB+BoJ(+PBoC) assets in USD", freq: weekly, derived: true}
+  rates_credit:                  # owner: rates_credit
+    - {id: "fred:DFF",       title: "Effective Fed funds (hurdle)", freq: daily, critical: true}
+    - {id: "fred:DFEDTARU",  title: "Fed funds target upper", freq: daily}
+    - {id: "fred:SOFR",      title: "SOFR", freq: daily}
+    - {id: "fred:DGS3MO",    title: "3m Treasury", freq: daily}
+    - {id: "fred:DGS2",      title: "2y Treasury", freq: daily, critical: true}
+    - {id: "fred:DGS10",     title: "10y Treasury", freq: daily, critical: true}
+    - {id: "fred:DGS30",     title: "30y Treasury", freq: daily}
+    - {id: "fred:T10Y3M",    title: "10y-3m slope", freq: daily}
+    - {id: "fred:DFII10",    title: "10y real yield (TIPS)", freq: daily, critical: true}
+    - {id: "fred:T5YIFR",    title: "5y5y forward inflation", freq: daily}
+    - {id: "fred:BAMLH0A0HYM2", title: "US high-yield OAS", freq: daily, critical: true}
+    - {id: "fred:BAMLC0A0CM", title: "US investment-grade OAS", freq: daily}
+    - {id: "fred:ECBDFR",    title: "ECB deposit rate", freq: daily}
+    - {id: "nyfed:ACMTP10",  title: "ACM 10y term premium", freq: daily}
+    - {id: "massive:ZQ_curve", title: "Fed funds futures strip (implied path)", freq: daily}
+  macro_cycle:                   # owner: macro_cycle
+    - {id: "fred:CPIAUCSL",  title: "CPI", freq: monthly, vintages: true}
+    - {id: "fred:CPILFESL",  title: "Core CPI", freq: monthly, vintages: true}
+    - {id: "fred:PCEPILFE",  title: "Core PCE", freq: monthly, vintages: true}
+    - {id: "fred:UNRATE",    title: "Unemployment rate", freq: monthly, vintages: true}
+    - {id: "fred:SAHMREALTIME", title: "Sahm rule (real-time)", freq: monthly}
+    - {id: "fred:ICSA",      title: "Initial jobless claims", freq: weekly, critical: true}
+    - {id: "fred:PAYEMS",    title: "Nonfarm payrolls", freq: monthly, vintages: true}
+    - {id: "fred:INDPRO",    title: "Industrial production", freq: monthly, vintages: true}
+    - {id: "fred:GDPNOW",    title: "Atlanta Fed GDPNow", freq: irregular}
+    - {id: "fred:MICH",      title: "UMich 1y inflation expectations", freq: monthly}
+    - {id: "oecd:CLI_G20",   title: "OECD CLI, G20 + US/EZ/China/Japan/India", freq: monthly}
+    - {id: "fred:GACDFSA066MSFRBPHI", title: "Philly Fed current activity", freq: monthly}
+  supply_chain:                  # owner: supply_chain
+    - {id: "nyfed:GSCPI",    title: "Global Supply Chain Pressure Index", freq: monthly, critical: true}
+    - {id: "web:drewry_wci", title: "Drewry World Container Index", freq: weekly}
+    - {id: "web:freightos_fbx", title: "Freightos Baltic Index", freq: weekly}
+    - {id: "fred:ISRATIO",   title: "US inventories/sales", freq: monthly}
+    - {id: "worldbank:pinksheet", title: "Commodity price index (monthly)", freq: monthly}
+  geopolitics:                   # owner: geopolitics
+    - {id: "gpr:GPRD",       title: "Daily geopolitical risk", freq: daily, critical: true}
+    - {id: "gpr:GPR_country", title: "Country GPR (monthly)", freq: monthly}
+    - {id: "fred:USEPUINDXD", title: "US economic policy uncertainty (daily)", freq: daily}
+    - {id: "web:news",       title: "Allow-listed news + official statements", freq: irregular}
+  energy:                        # owner: energy
+    - {id: "fred:DCOILWTICO", title: "WTI spot", freq: daily, critical: true}
+    - {id: "fred:DCOILBRENTEU", title: "Brent spot", freq: daily}
+    - {id: "fred:DHHNGSP",   title: "Henry Hub spot", freq: daily}
+    - {id: "eia:PET.WCESTUS1.W", title: "US crude stocks ex-SPR", freq: weekly, critical: true}
+    - {id: "eia:PET.W_EPC0_SAX_YCUOK_MBBL.W", title: "Cushing stocks", freq: weekly}
+    - {id: "eia:PET.WCRFPUS2.W", title: "US crude production", freq: weekly}
+    - {id: "eia:NG.NW2_EPG0_SWO_R48_BCF.W", title: "Natgas storage, lower 48", freq: weekly, critical: true}
+    - {id: "massive:CL_curve", title: "WTI futures curve (contango/backwardation)", freq: daily}
+    - {id: "massive:NG_curve", title: "Natgas futures curve", freq: daily}
+    - {id: "cftc:CL_managed_money", title: "COT managed money, crude", freq: weekly}
+    - {id: "cftc:NG_managed_money", title: "COT managed money, natgas", freq: weekly}
+    - {id: "fred:OVXCLS",    title: "Crude oil implied vol (OVX)", freq: daily}
+  metals:                        # owner: metals
+    - {id: "massive:GLD",    title: "GLD daily bars", freq: daily, critical: true}
+    - {id: "massive:SLV",    title: "SLV daily bars", freq: daily}
+    - {id: "massive:GC_curve", title: "Gold futures curve", freq: daily}
+    - {id: "cftc:GC_managed_money", title: "COT managed money, gold", freq: weekly}
+    - {id: "cftc:SI_managed_money", title: "COT managed money, silver", freq: weekly}
+    - {id: "fred:GVZCLS",    title: "Gold implied vol (GVZ)", freq: daily}
+    - {id: "calc:gold_silver_ratio", title: "Gold/silver ratio", freq: daily, derived: true}
+    - {id: "manual:wgc_cb_purchases", title: "Central-bank gold purchases (WGC)", freq: quarterly}
+  us_equity:                     # owner: us_equity
+    - {id: "massive:I:SPX",  title: "S&P 500 index", freq: daily, critical: true}
+    - {id: "massive:I:NDX",  title: "Nasdaq-100 index", freq: daily}
+    - {id: "massive:IWM",    title: "Russell 2000 ETF", freq: daily}
+    - {id: "calc:spx_breadth_200dma", title: "% of S&P 500 above 200dma", freq: daily, derived: true}
+    - {id: "calc:spx_fwd_eps_revisions", title: "Forward EPS revision breadth", freq: weekly, derived: true}
+  intl_equity:                   # owner: intl_equity
+    - {id: "massive:EFA",    title: "EAFE", freq: daily}
+    - {id: "massive:EEM",    title: "Emerging markets", freq: daily}
+    - {id: "massive:FEZ",    title: "Euro Stoxx 50", freq: daily}
+    - {id: "massive:EWJ",    title: "Japan", freq: daily}
+    - {id: "massive:FXI",    title: "China", freq: daily}
+    - {id: "massive:INDA",   title: "India", freq: daily}
+    - {id: "massive:EWZ",    title: "Brazil", freq: daily}
+    - {id: "fred:DEXJPUS",   title: "USD/JPY", freq: daily}
+  valuation:                     # owner: valuation
+    - {id: "shiller:US_CAPE", title: "US CAPE (Shiller)", freq: monthly, critical: true}
+    - {id: "global_cape:ACWI", title: "World CAPE", freq: monthly}
+    - {id: "global_cape:ACWI_XUS", title: "World ex-US CAPE", freq: monthly}
+    - {id: "global_cape:EM", title: "EM CAPE", freq: monthly}
+    - {id: "global_cape:COUNTRY", title: "Country CAPEs (EZ, JP, CN, IN, BR, UK)", freq: monthly}
+    - {id: "calc:us_excess_cape_yield", title: "1/CAPE - 10y real yield", freq: monthly, derived: true}
+    - {id: "calc:cape_pctiles", title: "CAPE percentile vs 10y / 20y / full history", freq: monthly, derived: true}
+  volatility:                    # owner: volatility
+    - {id: "fred:VIXCLS",    title: "VIX", freq: daily, critical: true}
+    - {id: "cboe:VIX9D",     title: "VIX 9-day", freq: daily}
+    - {id: "cboe:VIX3M",     title: "VIX 3-month", freq: daily}
+    - {id: "cboe:SKEW",      title: "Cboe SKEW", freq: daily}
+    - {id: "massive:option_chains", title: "Chains for every tradable underlying (EOD + intraday)", freq: intraday}
+    - {id: "calc:vol_metrics", title: "IV rank, IV pctile, RV20/60, VRP, 25d skew, term slope", freq: daily, derived: true}

@@ -1,0 +1,869 @@
+<title>Macro Trader v2 Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: an investment-committee briefing book. Sticky section index on top, one reading column
+   that widens into grids for the agent map, cards and tables. Banknote-ink greens, bronze for emphasis. */
+:root {
+  --bg: #f2f5f3;
+  --surface: #ffffff;
+  --surface-2: #e8eeeb;
+  --ink: #13211c;
+  --muted: #586a63;
+  --line: #d3ddd8;
+  --accent: #1e5d50;
+  --accent-soft: #dcebe6;
+  --bronze: #9a6b1f;
+  --bronze-soft: #f3e7d1;
+  --good: #2c7a49;
+  --warn: #a96d12;
+  --bad: #b03a35;
+  --info: #2c5c8a;
+  --r-gold: #2b7566;
+  --r-refl: #b8862b;
+  --r-stag: #a6493b;
+  --r-defl: #3c5f92;
+  --pos-2: #1e6a4f; --pos-1: #8cc1a8; --zero: #e3e8e5; --neg-1: #e7a99f; --neg-2: #a63c33;
+  --cell-ink-strong: #ffffff;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1412; --surface: #141d1a; --surface-2: #1b2622; --ink: #e2ebe7; --muted: #95a8a0;
+    --line: #263430; --accent: #72b8a6; --accent-soft: #1d322c; --bronze: #d6a85a; --bronze-soft: #33291a;
+    --good: #62c08a; --warn: #e3ab4e; --bad: #ec8077; --info: #84abd9;
+    --r-gold: #5fb8a3; --r-refl: #dcae55; --r-stag: #e27f6f; --r-defl: #86a7dc;
+    --pos-2: #3f9d79; --pos-1: #2c5a49; --zero: #222e2a; --neg-1: #6a3732; --neg-2: #c4584e;
+    --cell-ink-strong: #0d1412;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1412; --surface: #141d1a; --surface-2: #1b2622; --ink: #e2ebe7; --muted: #95a8a0;
+  --line: #263430; --accent: #72b8a6; --accent-soft: #1d322c; --bronze: #d6a85a; --bronze-soft: #33291a;
+  --good: #62c08a; --warn: #e3ab4e; --bad: #ec8077; --info: #84abd9;
+  --r-gold: #5fb8a3; --r-refl: #dcae55; --r-stag: #e27f6f; --r-defl: #86a7dc;
+  --pos-2: #3f9d79; --pos-1: #2c5a49; --zero: #222e2a; --neg-1: #6a3732; --neg-2: #c4584e;
+  --cell-ink-strong: #0d1412;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15.5px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 1180px; margin: 0 auto; }
+.mono { font-family: var(--font-mono); font-size: 0.86em; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- sticky index ---------- */
+.index {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.index-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 18px; overflow-x: auto; padding-block: 10px; scrollbar-width: thin; }
+.index .brand { font-family: var(--font-display); font-weight: 750; font-stretch: 112%; letter-spacing: 0.01em; white-space: nowrap; }
+.index nav { display: flex; gap: 4px; }
+.index nav a { white-space: nowrap; text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 500; padding: 5px 10px; border-radius: 999px; }
+.index nav a:hover { color: var(--ink); background: var(--surface-2); }
+
+/* ---------- type ---------- */
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; color: var(--ink); }
+h1 { font-size: clamp(30px, 4.6vw, 52px); line-height: 1.06; font-weight: 760; font-stretch: 108%; letter-spacing: -0.012em; max-width: 22ch; }
+h2 { font-size: clamp(23px, 2.6vw, 30px); line-height: 1.15; font-weight: 720; font-stretch: 110%; }
+h3 { font-size: 16.5px; line-height: 1.3; font-weight: 680; font-stretch: 104%; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 17.5px; color: var(--muted); max-width: 66ch; }
+.small { font-size: 13.5px; color: var(--muted); }
+
+/* ---------- sections ---------- */
+section { padding-block: 44px 8px; display: grid; gap: 22px; }
+section + section { border-top: 1px solid var(--line); margin-top: 32px; }
+.sec-head { display: grid; gap: 8px; }
+.sec-head .eyebrow { color: var(--accent); }
+
+/* ---------- hero ---------- */
+.hero { padding-block: 40px 8px; display: grid; gap: 20px; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--bronze); background: var(--bronze-soft); padding: 5px 10px; border-radius: 999px; width: fit-content; }
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--bronze); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.tile { background: var(--surface); padding: 14px 16px; display: grid; gap: 4px; min-width: 0; }
+.tile .k { font-size: 12.5px; color: var(--muted); }
+.tile .v { font-family: var(--font-display); font-size: 25px; font-weight: 720; font-stretch: 106%; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 12.5px; color: var(--muted); }
+.callout { border-left: 3px solid var(--bronze); background: var(--surface); padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; max-width: 80ch; }
+
+/* ---------- generic ---------- */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.badge { display: inline-block; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; border: 1px solid currentColor; line-height: 1.5; white-space: nowrap; }
+.badge.llm { color: var(--accent); }
+.badge.hybrid { color: var(--bronze); }
+.badge.code { color: var(--muted); }
+.badge.human { color: var(--info); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+ul.clean { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+ul.ticks { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+ul.ticks li::marker { color: var(--accent); }
+.scroll-x { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; background: var(--surface-2); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- return engine ---------- */
+.engine { display: grid; gap: 14px; }
+.eq { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+.eq .term { flex: 1 1 180px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 4px; min-width: 0; }
+.eq .term b { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
+.eq .op { align-self: center; font-family: var(--font-display); font-size: 24px; color: var(--muted); }
+.eq .term.hurdle { border-top: 3px solid var(--muted); }
+.eq .term.vrp { border-top: 3px solid var(--accent); }
+.eq .term.tilt { border-top: 3px solid var(--bronze); }
+.eq .term.cost { border-top: 3px solid var(--bad); }
+.wf { display: grid; gap: 8px; }
+.wf-row { display: grid; grid-template-columns: minmax(130px, 220px) 1fr 70px; gap: 12px; align-items: center; font-size: 14px; }
+.wf-track { position: relative; height: 22px; background: var(--surface-2); border-radius: 4px; }
+.wf-bar { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+.wf-val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.axis { display: grid; grid-template-columns: minmax(130px, 220px) 1fr 70px; gap: 12px; font-size: 11.5px; color: var(--muted); font-family: var(--font-mono); }
+.axis .ticks { display: flex; justify-content: space-between; }
+
+/* ---------- agent map ---------- */
+.map { display: grid; gap: 10px; }
+.layer { display: grid; grid-template-columns: 170px 1fr; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.layer-label { display: grid; gap: 2px; align-content: start; }
+.layer-label .eyebrow { color: var(--accent); }
+.layer-label b { font-family: var(--font-display); font-weight: 700; font-size: 15px; font-stretch: 106%; }
+.nodes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-width: 0; }
+.node { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); text-decoration: none; color: var(--ink); font-size: 13.5px; font-weight: 550; }
+.node:hover { border-color: var(--accent); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.dot.llm { background: var(--accent); }
+.dot.hybrid { background: var(--bronze); }
+.dot.code { background: var(--muted); }
+.dot.human { background: var(--info); }
+.arrow { color: var(--muted); font-size: 15px; }
+.flowdown { text-align: center; color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+.node.you { border-color: var(--info); color: var(--info); }
+
+/* ---------- agent cards ---------- */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.card:target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.card .idx { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.card .q { font-style: italic; color: var(--ink); }
+.card dl { margin: 0; display: grid; grid-template-columns: 74px 1fr; gap: 4px 10px; font-size: 13.5px; }
+.card dt { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+.card dd { margin: 0; min-width: 0; }
+.group-title { display: flex; align-items: baseline; gap: 10px; margin-top: 8px; }
+.group-title h3 { font-size: 15px; }
+
+/* ---------- run steps ---------- */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; counter-reset: s; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 14px 14px 52px; position: relative; display: grid; gap: 6px; align-content: start; }
+.step::before { counter-increment: s; content: counter(s, decimal-leading-zero); position: absolute; left: 14px; top: 13px; font-family: var(--font-mono); font-size: 13px; color: var(--accent); font-weight: 500; }
+.step .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.tag.c { background: var(--accent-soft); color: var(--accent); }
+.tag.i { background: var(--bronze-soft); color: var(--bronze); }
+.tag.h { background: var(--surface-2); color: var(--info); }
+
+/* ---------- harness ---------- */
+.subsys { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.subsys .panel h3 { display: flex; gap: 10px; align-items: baseline; }
+.subsys .panel h3 .mono { color: var(--accent); }
+.matrix { display: grid; grid-template-columns: 120px 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; font-size: 13.5px; }
+.matrix > div { background: var(--surface); padding: 12px; min-width: 0; }
+.matrix .mh { background: var(--surface-2); font-weight: 650; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.rules { counter-reset: r; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 8px 22px; margin: 0; padding: 0; list-style: none; }
+.rules li { counter-increment: r; display: grid; grid-template-columns: 30px 1fr; gap: 6px; font-size: 14.5px; }
+.rules li::before { content: counter(r); font-family: var(--font-mono); color: var(--bronze); font-weight: 500; }
+
+/* ---------- data ---------- */
+.pipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--line); }
+.pipe > div { background: var(--surface); padding: 14px; display: grid; gap: 4px; align-content: start; border-right: 1px solid var(--line); position: relative; min-width: 0; }
+.pipe .k { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+.pipe b { font-size: 14.5px; }
+.pipe p { font-size: 13px; color: var(--muted); }
+.schemas { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.schemas .panel { gap: 8px; }
+.schemas h3 { font-family: var(--font-mono); font-size: 15px; font-weight: 500; color: var(--accent); }
+.tbls { display: flex; flex-wrap: wrap; gap: 5px; }
+.tbls span { font-family: var(--font-mono); font-size: 11.5px; background: var(--surface-2); padding: 2px 7px; border-radius: 4px; }
+.sources { display: flex; flex-wrap: wrap; gap: 8px; }
+.src { display: inline-flex; gap: 8px; align-items: center; padding: 6px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font-size: 13.5px; }
+.src i { font-style: normal; font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; padding: 1px 6px; border-radius: 4px; }
+.src i.free { color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); }
+.src i.paid { color: var(--bronze); background: var(--bronze-soft); }
+.src i.conn { color: var(--info); background: color-mix(in srgb, var(--info) 12%, transparent); }
+
+/* ---------- regime ---------- */
+.quad { display: grid; grid-template-columns: 34px 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 8px; }
+.quad .ax { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); display: flex; align-items: center; justify-content: center; text-transform: uppercase; letter-spacing: 0.05em; }
+.quad .ax.v { writing-mode: vertical-rl; transform: rotate(180deg); }
+.qc { border-radius: var(--radius); padding: 14px; display: grid; gap: 4px; align-content: start; background: var(--surface); border: 1px solid var(--line); border-top-width: 4px; min-width: 0; }
+.qc b { font-family: var(--font-display); font-size: 17px; font-weight: 720; }
+.qc p { font-size: 13px; color: var(--muted); }
+.qc.g { border-top-color: var(--r-gold); } .qc.g b { color: var(--r-gold); }
+.qc.r { border-top-color: var(--r-refl); } .qc.r b { color: var(--r-refl); }
+.qc.s { border-top-color: var(--r-stag); } .qc.s b { color: var(--r-stag); }
+.qc.d { border-top-color: var(--r-defl); } .qc.d b { color: var(--r-defl); }
+table.heat th.n { text-align: center; }
+table.heat td.c { text-align: center; font-weight: 650; font-variant-numeric: tabular-nums; width: 15%; }
+.h2p { background: var(--pos-2); color: var(--cell-ink-strong); }
+.h1p { background: var(--pos-1); color: var(--ink); }
+.h0 { background: var(--zero); color: var(--muted); }
+.h1n { background: var(--neg-1); color: var(--ink); }
+.h2n { background: var(--neg-2); color: var(--cell-ink-strong); }
+.probs { display: grid; gap: 8px; }
+.prow { display: grid; grid-template-columns: 110px 1fr 46px; gap: 10px; align-items: center; font-size: 13.5px; }
+.ptrack { height: 14px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.pbar { height: 100%; border-radius: 3px; }
+.blend { display: grid; gap: 7px; }
+.brow { display: grid; grid-template-columns: 150px 1fr 54px 170px; gap: 10px; align-items: center; font-size: 13.5px; }
+.btrack { position: relative; height: 16px; background: var(--surface-2); border-radius: 3px; }
+.btrack::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--muted); }
+.bbar { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.bbar.pos { left: 50%; background: var(--accent); }
+.bbar.neg { right: 50%; background: var(--bad); }
+.bth { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px dashed var(--muted); opacity: 0.7; }
+.act { font-size: 12.5px; }
+.act.bull { color: var(--accent); font-weight: 600; }
+.act.bear { color: var(--bad); font-weight: 600; }
+.act.neu { color: var(--muted); }
+
+/* ---------- risk ---------- */
+.limits { display: grid; gap: 7px; }
+.lrow { display: grid; grid-template-columns: minmax(150px, 230px) 1fr 52px; gap: 10px; align-items: center; font-size: 13.5px; }
+.ltrack { height: 14px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.lbar { height: 100%; background: var(--bronze); border-radius: 3px; }
+.ladder { display: grid; gap: 8px; }
+.rung { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: center; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; border-left-width: 4px; }
+.rung .t { font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+.rung.w { border-left-color: var(--warn); }
+.rung.b { border-left-color: var(--bad); }
+.rung.i { border-left-color: var(--info); }
+
+/* ---------- preview ---------- */
+.mock { border: 1px dashed var(--bronze); border-radius: 14px; padding: 16px; display: grid; gap: 14px; background: var(--bg); }
+.mock-flag { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--bronze); }
+.mock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.meter { height: 10px; background: var(--surface-2); border-radius: 999px; overflow: hidden; position: relative; }
+.meter span { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 999px; }
+.meter i { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--bad); }
+.chip { display: inline-block; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { color: var(--good); background: color-mix(in srgb, var(--good) 13%, transparent); }
+.chip.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 15%, transparent); }
+.chip.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 13%, transparent); }
+.chip.neu { color: var(--muted); background: var(--surface-2); }
+
+/* ---------- roadmap & questions ---------- */
+.phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.phase { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 6px; align-content: start; }
+.phase .p { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.phase.now { border-color: var(--bronze); box-shadow: inset 0 3px 0 var(--bronze); }
+.phase.now .p { color: var(--bronze); }
+.phase .exit { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 6px; }
+.qs { display: grid; gap: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.qrow { display: grid; grid-template-columns: 48px 1fr minmax(220px, 0.8fr); gap: 14px; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.qrow:last-child { border-bottom: 0; }
+.qrow .qn { font-family: var(--font-mono); color: var(--bronze); font-size: 13px; padding-top: 1px; }
+.qrow .qd { color: var(--muted); font-size: 13.5px; }
+.qrow .qd b { color: var(--ink); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; display: block; }
+.qgroup { padding: 8px 14px; background: var(--surface-2); font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-bottom: 1px solid var(--line); }
+footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+
+@media (max-width: 720px) {
+  .layer { grid-template-columns: 1fr; }
+  .wf-row, .axis { grid-template-columns: 110px 1fr 56px; }
+  .brow { grid-template-columns: 104px 1fr 44px; }
+  .brow .act { grid-column: 1 / -1; padding-left: 0; margin-top: -4px; }
+  .lrow { grid-template-columns: 130px 1fr 44px; }
+  .qrow { grid-template-columns: 34px 1fr; }
+  .qrow .qd { grid-column: 2; }
+  .matrix { grid-template-columns: 90px 1fr 1fr; font-size: 12.5px; }
+  .eq .op { display: none; }
+}
+</style>
+
+<header class="index">
+  <div class="index-inner">
+    <span class="brand">Macro Trader v2</span>
+    <nav aria-label="Sections">
+      <a href="#engine">Return engine</a>
+      <a href="#map">Agent map</a>
+      <a href="#agents">Agents</a>
+      <a href="#run">Weekly run</a>
+      <a href="#harness">Harness</a>
+      <a href="#data">Data</a>
+      <a href="#regime">Regime playbook</a>
+      <a href="#risk">Options &amp; risk</a>
+      <a href="#preview">Dashboard preview</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#questions">Your decisions</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= HERO ================= -->
+<div class="hero" id="overview">
+  <span class="status">Design draft v0.1 · awaiting your approval · nothing trades yet</span>
+  <h1>Earn Fed funds on the collateral. Sell options where the macro desk has an edge.</h1>
+  <p class="lede">A $1,000,000 book run by 19 Claude agents (7 of them hybrid, where code does the math) and 2 code-only services. The research desk reads liquidity, rates, growth, inflation, geopolitics, supply chains, energy, metals, US and international equities, valuations and volatility. The committee turns that into regime probabilities and sleeve targets. Every view is expressed with out-of-the-money short options, every number is checked against stored data, and you approve every ticket.</p>
+  <div class="tiles">
+    <div class="tile"><span class="k">Hurdle</span><span class="v">Fed funds</span><span class="s mono">fred:DFF, compounded daily</span></div>
+    <div class="tile"><span class="k">Target excess return</span><span class="v">+4 to +8%</span><span class="s">per year, net of costs</span></div>
+    <div class="tile"><span class="k">Drawdown budget</span><span class="v">12%</span><span class="s">breakers at 5 / 8 / 12%</span></div>
+    <div class="tile"><span class="k">Buying power used</span><span class="v">25–40%</span><span class="s">hard cap 50% of NAV</span></div>
+    <div class="tile"><span class="k">Trades without your approval</span><span class="v">0</span><span class="s">paper mode by default</span></div>
+  </div>
+  <p class="callout"><strong>What I need from you:</strong> approve or change this design and answer the 13 decisions at the <a href="#questions">end of this page</a>. Defaults are listed for each, so "defaults are fine" is a valid answer.</p>
+</div>
+
+<!-- ================= ENGINE ================= -->
+<section id="engine">
+  <div class="sec-head">
+    <span class="eyebrow">01 · How the money is made</span>
+    <h2>Three return sources, one hurdle</h2>
+    <p>The T-bill collateral earns roughly the hurdle by itself. The agents exist to add the volatility premium and the macro tilt on top, while keeping crash losses inside a fixed budget.</p>
+  </div>
+  <div class="eq">
+    <div class="term hurdle"><span class="eyebrow">Collateral</span><b>≈ Fed funds</b><span class="small">≥ 85% of NAV in T-bills or SGOV/BIL. Options are margined against them, so the cash keeps earning.</span></div>
+    <span class="op" aria-hidden="true">+</span>
+    <div class="term vrp"><span class="eyebrow">Engine</span><b>Volatility risk premium</b><span class="small">Implied vol usually exceeds realized. Selling ~16Δ options at 30–60 DTE harvests the gap.</span></div>
+    <span class="op" aria-hidden="true">+</span>
+    <div class="term tilt"><span class="eyebrow">Edge</span><b>Macro tilt</b><span class="small">Sell puts where bullish, call spreads where bearish, condors where range-bound, nothing where there is no edge.</span></div>
+    <span class="op" aria-hidden="true">−</span>
+    <div class="term cost"><span class="eyebrow">Drag</span><b>Losses and costs</b><span class="small">Assignment, stops, slippage, fees, data and model usage. Bounded by stress limits.</span></div>
+  </div>
+  <div class="panel">
+    <h3>Illustrative base case, excess return over Fed funds (% of NAV per year)</h3>
+    <p class="small">Assumptions, not a forecast: average buying power used 35% of NAV; 15% per year net premium kept on that buying power; 0.5% of NAV in costs. Paper trading must prove it.</p>
+    <div class="wf">
+      <div class="wf-row"><span>Premium kept (35% × 15%)</span><div class="wf-track"><div class="wf-bar" style="left:0;width:87.5%;background:var(--accent)"></div></div><span class="wf-val">+5.25%</span></div>
+      <div class="wf-row"><span>Costs and slippage</span><div class="wf-track"><div class="wf-bar" style="left:79.17%;width:8.33%;background:var(--bad)"></div></div><span class="wf-val">−0.50%</span></div>
+      <div class="wf-row"><span><strong>Excess over Fed funds</strong></span><div class="wf-track"><div class="wf-bar" style="left:0;width:79.17%;background:var(--bronze)"></div></div><span class="wf-val">+4.75%</span></div>
+      <div class="axis"><span></span><div class="ticks"><span>0%</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6%</span></div><span></span></div>
+    </div>
+    <p class="small">Good year (20% on 40% buying power): about +8%. Crash year: bounded by the equities −20% stress limit at roughly −12% of NAV.</p>
+  </div>
+</section>
+
+<!-- ================= MAP ================= -->
+<section id="map">
+  <div class="sec-head">
+    <span class="eyebrow">02 · Organization</span>
+    <h2>The agent map</h2>
+    <p>Data flows up, limits flow down. Models sit only where judgment is needed; anything that moves money or produces a number that matters is code. Select an agent to jump to its card.</p>
+  </div>
+  <div class="legend">
+    <span><i class="dot llm"></i> Claude agent</span>
+    <span><i class="dot hybrid"></i> Hybrid: code computes, Claude judges</span>
+    <span><i class="dot code"></i> Deterministic code</span>
+    <span><i class="dot human"></i> You</span>
+  </div>
+  <div class="map">
+    <div class="layer">
+      <div class="layer-label"><span class="eyebrow">Layer 4</span><b>Learning &amp; upkeep</b></div>
+      <div class="nodes">
+        <a class="node" href="#a-performance"><i class="dot hybrid"></i>Performance &amp; Post-mortem</a>
+        <a class="node" href="#a-janitor"><i class="dot llm"></i>Harness Janitor</a>
+        <span class="small">Lessons you accept flow back into agents' context.</span>
+      </div>
+    </div>
+    <div class="flowdown" aria-hidden="true">▲ fills, marks, outcomes</div>
+    <div class="layer">
+      <div class="layer-label"><span class="eyebrow">Layer 3</span><b>Implementation</b></div>
+      <div class="nodes">
+        <a class="node" href="#a-structurer"><i class="dot hybrid"></i>Options Structurer</a><span class="arrow">→</span>
+        <a class="node" href="#a-risk"><i class="dot hybrid"></i>Risk Manager</a><span class="arrow">→</span>
+        <span class="node you"><i class="dot human"></i>You approve</span><span class="arrow">→</span>
+        <a class="node" href="#a-exec"><i class="dot code"></i>Execution Gateway</a><span class="arrow">→</span>
+        <a class="node" href="#a-monitor"><i class="dot hybrid"></i>Position Monitor</a>
+      </div>
+    </div>
+    <div class="flowdown" aria-hidden="true">▲ sleeve targets</div>
+    <div class="layer">
+      <div class="layer-label"><span class="eyebrow">Layer 2</span><b>Investment committee</b></div>
+      <div class="nodes">
+        <a class="node" href="#a-regime"><i class="dot hybrid"></i>Regime Strategist</a><span class="arrow">→</span>
+        <a class="node" href="#a-cio"><i class="dot llm"></i>CIO / Portfolio Constructor</a><span class="arrow">⇄</span>
+        <a class="node" href="#a-redteam"><i class="dot llm"></i>Red Team</a>
+      </div>
+    </div>
+    <div class="flowdown" aria-hidden="true">▲ 11 validated research reports</div>
+    <div class="layer">
+      <div class="layer-label"><span class="eyebrow">Layer 1</span><b>Research desk</b><span class="small">parallel, read-only</span></div>
+      <div class="nodes">
+        <a class="node" href="#a-liquidity"><i class="dot llm"></i>Liquidity &amp; Dollar</a>
+        <a class="node" href="#a-rates"><i class="dot llm"></i>Rates, CBs &amp; Credit</a>
+        <a class="node" href="#a-macro"><i class="dot llm"></i>Growth &amp; Inflation</a>
+        <a class="node" href="#a-geo"><i class="dot llm"></i>Geopolitics</a>
+        <a class="node" href="#a-supply"><i class="dot llm"></i>Supply Chain</a>
+        <a class="node" href="#a-energy"><i class="dot llm"></i>Crude &amp; NatGas</a>
+        <a class="node" href="#a-metals"><i class="dot llm"></i>Gold &amp; Silver</a>
+        <a class="node" href="#a-us"><i class="dot llm"></i>US Equities</a>
+        <a class="node" href="#a-intl"><i class="dot llm"></i>Intl Equities</a>
+        <a class="node" href="#a-valuation"><i class="dot hybrid"></i>Valuation &amp; CAPE</a>
+        <a class="node" href="#a-vol"><i class="dot hybrid"></i>Volatility Surface</a>
+      </div>
+    </div>
+    <div class="flowdown" aria-hidden="true">▲ point-in-time data, context packs</div>
+    <div class="layer">
+      <div class="layer-label"><span class="eyebrow">Layer 0</span><b>Data plane</b></div>
+      <div class="nodes">
+        <span class="node"><i class="dot code"></i>15 sources</span><span class="arrow">→</span>
+        <a class="node" href="#a-steward"><i class="dot code"></i>Data Steward</a><span class="arrow">→</span>
+        <a class="node" href="#data"><i class="dot code"></i>Postgres system of record</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= AGENTS ================= -->
+<section id="agents">
+  <div class="sec-head">
+    <span class="eyebrow">03 · Roles</span>
+    <h2>What each agent does</h2>
+    <p>Each agent answers one question, reads only stored data through read-only tools, and returns one typed report in which every number cites its source. All Claude agents run Opus 5.5 with effort tuned per role; definitions live in <span class="mono">config/agents.yaml</span>.</p>
+  </div>
+
+  <div class="group-title"><h3>Research desk</h3><span class="small">11 desks, run in parallel each week, refreshed daily where data moves daily</span></div>
+  <div class="cards">
+    <article class="card" id="a-liquidity"><div class="card-top"><span class="idx">01</span><span class="badge llm">Claude</span></div><h3>Global Liquidity &amp; Dollar</h3><p class="q">Is liquidity expanding or draining, and is the dollar a headwind?</p><dl><dt>Reads</dt><dd>Fed assets, TGA, reverse repo, reserves, ECB and BoJ balance sheets, broad USD, financial conditions</dd><dt>Produces</dt><dd>Liquidity score −3…+3 and its 13-week impulse</dd></dl></article>
+    <article class="card" id="a-rates"><div class="card-top"><span class="idx">02</span><span class="badge llm">Claude · web</span></div><h3>Rates, Central Banks &amp; Credit</h3><p class="q">Where is policy going versus what futures price, and is credit confirming?</p><dl><dt>Reads</dt><dd>Fed funds (the hurdle), futures-implied path, 2y/10y/30y, real yields, breakevens, term premium, IG/HY spreads, ECB/BoJ/BoE</dd><dt>Produces</dt><dd>Rate-path view, curve regime, credit stress score</dd></dl></article>
+    <article class="card" id="a-macro"><div class="card-top"><span class="idx">03</span><span class="badge llm">Claude</span></div><h3>Growth &amp; Inflation Nowcast</h3><p class="q">Which way are growth and inflation moving, at home and abroad?</p><dl><dt>Reads</dt><dd>Claims, payrolls, Sahm rule, GDPNow, OECD leading indicators, CPI/PCE momentum, expectations; vintage data only</dd><dt>Produces</dt><dd>Growth and inflation scores: the two regime axes</dd></dl></article>
+    <article class="card" id="a-geo"><div class="card-top"><span class="idx">04</span><span class="badge llm">Claude · web</span></div><h3>Geopolitics &amp; Policy Risk</h3><p class="q">What could move oil 20% or equities 10% within 45 days, and is it priced?</p><dl><dt>Reads</dt><dd>Geopolitical Risk and Policy Uncertainty indices, allow-listed news and official statements</dd><dt>Produces</dt><dd>Risk register: probability, severity, channel (oil, shipping, semis, USD), sleeves hit</dd></dl></article>
+    <article class="card" id="a-supply"><div class="card-top"><span class="idx">05</span><span class="badge llm">Claude · web</span></div><h3>Global Supply Chain &amp; Trade</h3><p class="q">Are goods pipelines loosening or tightening, and what does that do to inflation?</p><dl><dt>Reads</dt><dd>NY Fed GSCPI, container freight indices, inventories-to-sales, tariffs, semiconductor and critical-mineral bottlenecks</dd><dt>Produces</dt><dd>Supply-pressure score feeding the inflation axis</dd></dl></article>
+    <article class="card" id="a-energy"><div class="card-top"><span class="idx">06</span><span class="badge llm">Claude · web</span></div><h3>Crude Oil &amp; Natural Gas</h3><p class="q">Is the oil and gas market tight or loose over the next 30–60 days?</p><dl><dt>Reads</dt><dd>EIA inventories vs 5-year range, Cushing, production, gas storage, futures curves, OPEC+, COT positioning, OVX</dd><dt>Produces</dt><dd>Direction and vol view for USO, UNG, XLE (Phase 2: /CL, /NG)</dd></dl></article>
+    <article class="card" id="a-metals"><div class="card-top"><span class="idx">07</span><span class="badge llm">Claude · web</span></div><h3>Gold &amp; Silver</h3><p class="q">Is gold trading on real rates, the dollar, or central-bank demand?</p><dl><dt>Reads</dt><dd>Real yields, USD, central-bank purchases, ETF holdings, COT, gold/silver ratio, GVZ, industrial silver demand</dd><dt>Produces</dt><dd>Views for GLD and SLV (Phase 2: /GC)</dd></dl></article>
+    <article class="card" id="a-us"><div class="card-top"><span class="idx">08</span><span class="badge llm">Claude</span></div><h3>US Equities</h3><p class="q">Is the US tape healthy, and is the market paying us enough for risk?</p><dl><dt>Reads</dt><dd>S&amp;P 500, Nasdaq-100, Russell 2000 trend and breadth, earnings revisions, equity risk premium vs real yields, credit</dd><dt>Produces</dt><dd>Views for XSP/SPX, QQQ, IWM</dd></dl></article>
+    <article class="card" id="a-intl"><div class="card-top"><span class="idx">09</span><span class="badge llm">Claude</span></div><h3>International Equities</h3><p class="q">Which foreign markets are best to sell puts or calls on?</p><dl><dt>Reads</dt><dd>EFA, EEM, FEZ, EWJ, FXI, INDA, EWZ vs the S&amp;P, local policy, USD/JPY carry, broad dollar</dd><dt>Produces</dt><dd>Ranked views on international ETFs</dd></dl></article>
+    <article class="card" id="a-valuation"><div class="card-top"><span class="idx">10</span><span class="badge hybrid">Hybrid</span></div><h3>Valuation &amp; CAPE</h3><p class="q">How expensive is each market against its own 10- and 20-year history and against real rates?</p><dl><dt>Reads</dt><dd>Shiller US CAPE; world, ex-US, EM and country CAPEs; 10y real yield</dd><dt>Produces</dt><dd>Percentile and z-score vs 10y / 20y / full history, excess CAPE yield, sizing modifier per sleeve</dd></dl></article>
+    <article class="card" id="a-vol"><div class="card-top"><span class="idx">11</span><span class="badge hybrid">Hybrid</span></div><h3>Volatility &amp; Options Surface</h3><p class="q">Where is option premium rich enough to sell?</p><dl><dt>Reads</dt><dd>Live chains, IV rank and percentile, implied vs realized vol, 25Δ skew, term structure, VIX/VIX3M, MOVE, OVX, GVZ</dd><dt>Produces</dt><dd>Premium-per-unit-of-risk ranking of every tradable underlying</dd></dl></article>
+  </div>
+
+  <div class="group-title"><h3>Investment committee</h3><span class="small">weekly; decides direction and size per sleeve</span></div>
+  <div class="cards">
+    <article class="card" id="a-regime"><div class="card-top"><span class="idx">12</span><span class="badge hybrid">Hybrid</span></div><h3>Regime Strategist</h3><p class="q">Which of the four regimes are we in, and how likely is a change?</p><dl><dt>How</dt><dd>Code computes a probability prior from the growth and inflation scores. The agent may shift each probability by at most 15 points, citing evidence.</dd><dt>Produces</dt><dd>Regime probabilities and 45-day change risk</dd></dl></article>
+    <article class="card" id="a-cio"><div class="card-top"><span class="idx">13</span><span class="badge llm">Claude</span></div><h3>CIO / Portfolio Constructor</h3><p class="q">What should each sleeve be: direction, conviction, delta and risk budget?</p><dl><dt>Goal</dt><dd>Maximize expected excess return over Fed funds per unit of stress loss, inside policy limits</dd><dt>Produces</dt><dd>Sleeve targets and the IC memo; a written answer to every red-team challenge</dd></dl></article>
+    <article class="card" id="a-redteam"><div class="card-top"><span class="idx">14</span><span class="badge llm">Claude</span></div><h3>Red Team</h3><p class="q">How does this plan lose money?</p><dl><dt>How</dt><dd>Separate context and an adversarial brief. Runs the stress engine; hunts hidden correlation, crowding, stale evidence, event risk.</dd><dt>Produces</dt><dd>At least three concrete challenges, each with a proposed fix</dd></dl></article>
+  </div>
+
+  <div class="group-title"><h3>Implementation</h3><span class="small">turns targets into tickets, checks them, executes only what you approve</span></div>
+  <div class="cards">
+    <article class="card" id="a-structurer"><div class="card-top"><span class="idx">15</span><span class="badge hybrid">Hybrid</span></div><h3>Options Structurer</h3><p class="q">Which exact trades express the targets best?</p><dl><dt>How</dt><dd>Code builds candidates from live chains with exact credit, max loss, buying power, POP and Greeks. The agent chooses and sizes; it can't invent strikes or prices.</dd><dt>Produces</dt><dd>Trade proposals linked to the research behind them</dd></dl></article>
+    <article class="card" id="a-risk"><div class="card-top"><span class="idx">16</span><span class="badge hybrid">Hybrid</span></div><h3>Risk Manager</h3><p class="q">Does the book stay inside every limit after these trades?</p><dl><dt>How</dt><dd>The policy engine checks buying power, delta, vega, concentration, expiry ladder and 9 stress scenarios. A block is final; the agent can only shrink or reject.</dd><dt>Produces</dt><dd>Risk checks and the risk memo</dd></dl></article>
+    <article class="card" id="a-exec"><div class="card-top"><span class="idx">17</span><span class="badge code">Code</span></div><h3>Execution Gateway</h3><p class="q">Send only what was approved, exactly once.</p><dl><dt>How</dt><dd>Paper by default. Limit orders at mid with bounded improvement, idempotency keys, fills reconciled with the broker. No model can call it.</dd><dt>Produces</dt><dd>Orders, fills, positions</dd></dl></article>
+    <article class="card" id="a-monitor"><div class="card-top"><span class="idx">18</span><span class="badge hybrid">Hybrid</span></div><h3>Position Monitor</h3><p class="q">Does any open position need action today?</p><dl><dt>Triggers</dt><dd>50% take-profit, 21-DTE exit, 2× credit stop, short strike past 0.35Δ, event blackout, assignment risk</dd><dt>Produces</dt><dd>Close and roll proposals (they go through risk and your approval)</dd></dl></article>
+  </div>
+
+  <div class="group-title"><h3>Data, learning &amp; upkeep</h3></div>
+  <div class="cards">
+    <article class="card" id="a-steward"><div class="card-top"><span class="idx">00</span><span class="badge code">Code</span></div><h3>Data Steward</h3><p class="q">Fetch only what is due, only once.</p><dl><dt>How</dt><dd>The only component that calls external data APIs. Requests only new observations, hashes and archives every payload, keeps every revision.</dd><dt>Produces</dt><dd>Point-in-time observations, derived metrics, freshness report</dd></dl></article>
+    <article class="card" id="a-performance"><div class="card-top"><span class="idx">19</span><span class="badge hybrid">Hybrid</span></div><h3>Performance &amp; Post-mortem</h3><p class="q">Did we beat Fed funds, why, and which agents were right?</p><dl><dt>How</dt><dd>Attribution: collateral income, premium decay, direction, vol. Resolves every falsifiable view and scores calibration.</dd><dt>Produces</dt><dd>Scorecards and proposed lessons for you to accept or reject</dd></dl></article>
+    <article class="card" id="a-janitor"><div class="card-top"><span class="idx">20</span><span class="badge llm">Claude</span></div><h3>Harness Janitor</h3><p class="q">What is drifting or breaking?</p><dl><dt>Finds</dt><dd>Failing adapters, TTLs that fetch nothing new, docs that disagree with config, unused series, cost creep</dd><dt>Produces</dt><dd>Weekly maintenance report and small fix PRs; never touches risk limits</dd></dl></article>
+  </div>
+</section>
+
+<!-- ================= RUN ================= -->
+<section id="run">
+  <div class="sec-head">
+    <span class="eyebrow">04 · One weekly cycle</span>
+    <h2>Sunday evening to Monday's fills</h2>
+    <p>The flow is fixed in code. Models decide what to conclude, never what runs next. Each step names the checks that run on it.</p>
+  </div>
+  <div class="legend"><span><span class="tag c">computational check</span></span><span><span class="tag i">model review</span></span><span><span class="tag h">you</span></span></div>
+  <div class="steps">
+    <div class="step"><h3>Preflight</h3><p class="small">Kill switch, broker link, budgets, freshness of critical series.</p><div class="tags"><span class="tag c">stale critical data → research-only mode</span></div></div>
+    <div class="step"><h3>Ingest</h3><p class="small">The Data Steward fetches only due series and only their new observations.</p><div class="tags"><span class="tag c">a second run downloads nothing</span></div></div>
+    <div class="step"><h3>Derive</h3><p class="small">Code recomputes CAPE percentiles, net liquidity, vol metrics and z-scores.</p><div class="tags"><span class="tag c">lineage stored per metric</span></div></div>
+    <div class="step"><h3>Research fan-out</h3><p class="small">11 desks in parallel, each with a context pack built from the database.</p><div class="tags"><span class="tag c">schema</span><span class="tag c">citations</span><span class="tag c">freshness</span><span class="tag c">≤ 2 retries with remediation</span></div></div>
+    <div class="step"><h3>Regime</h3><p class="small">Quant prior, then a bounded adjustment by the Regime Strategist.</p><div class="tags"><span class="tag c">±15 pt bound</span><span class="tag c">probabilities sum to 1</span></div></div>
+    <div class="step"><h3>CIO plan</h3><p class="small">Sleeve direction, conviction, delta and risk budget; IC memo.</p><div class="tags"><span class="tag c">policy pre-check</span></div></div>
+    <div class="step"><h3>Red team</h3><p class="small">A separate agent tries to break the plan; the CIO answers each challenge.</p><div class="tags"><span class="tag i">adversarial review</span></div></div>
+    <div class="step"><h3>Structure</h3><p class="small">Code generates candidate trades from live chains; the structurer picks and sizes.</p><div class="tags"><span class="tag c">candidate IDs only</span><span class="tag c">liquidity filters</span></div></div>
+    <div class="step"><h3>Risk gate</h3><p class="small">Policy limits and 9 stress scenarios on the post-trade book.</p><div class="tags"><span class="tag c">block is final</span><span class="tag i">risk memo on warnings</span></div></div>
+    <div class="step"><h3>Your approval</h3><p class="small">Approve, modify or reject each ticket on the committee page, Monday before the open.</p><div class="tags"><span class="tag h">nothing executes without it</span></div></div>
+    <div class="step"><h3>Execute</h3><p class="small">Paper by default; limit orders 09:45–15:45 ET; fills reconciled.</p><div class="tags"><span class="tag c">idempotency keys</span></div></div>
+    <div class="step"><h3>Record &amp; learn</h3><p class="small">Run report, costs, lineage; every view queued for scoring on its resolve date.</p><div class="tags"><span class="tag c">traces</span><span class="tag i">post-mortems monthly</span></div></div>
+  </div>
+  <div class="scroll-x">
+    <table>
+      <thead><tr><th>Run</th><th>When (ET, proposed)</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Daily</strong></td><td class="num">06:30 ingest · 16:30 monitor</td><td>Due series, vol metrics, position marks, management triggers, liquidity and vol refresh, risk check, alerts</td></tr>
+        <tr><td><strong>Weekly IC</strong></td><td class="num">Sun 18:00 · approvals Mon pre-open</td><td>The full cycle above</td></tr>
+        <tr><td><strong>Event</strong></td><td>On trigger</td><td>VIX +25% in a day, geopolitical risk above its 95th percentile, crude ±8%, FOMC or CPI surprise → affected desks, risk and monitor</td></tr>
+        <tr><td><strong>Monthly</strong></td><td>First weekend</td><td>CAPE refresh, attribution, calibration scoring, post-mortems, proposed lessons</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= HARNESS ================= -->
+<section id="harness">
+  <div class="sec-head">
+    <span class="eyebrow">05 · Harness engineering</span>
+    <h2>Agent = model + harness</h2>
+    <p>The model supplies judgment. The harness is everything around it: what each agent sees, which tools it may call, how its output is checked, where state lives, what it is forbidden to do, how every step is recorded and how the system learns. Full write-up in <span class="mono">docs/design/HARNESS.md</span>.</p>
+  </div>
+  <div class="matrix" role="table" aria-label="Guides and sensors">
+    <div class="mh" role="columnheader"></div>
+    <div class="mh" role="columnheader">Computational (code)</div>
+    <div class="mh" role="columnheader">Inferential (a model judges)</div>
+    <div class="mh" role="rowheader">Guides<br><span class="small" style="text-transform:none;letter-spacing:0">steer before acting</span></div>
+    <div>Typed tool signatures, allow-listed tools, context packs built by code, output JSON schema, limits stated up front</div>
+    <div>Agent charters, playbooks, lessons accepted from post-mortems</div>
+    <div class="mh" role="rowheader">Sensors<br><span class="small" style="text-transform:none;letter-spacing:0">check after acting</span></div>
+    <div>Schema validator, citation checker, freshness checker, numeric consistency, policy engine, stress engine</div>
+    <div>Red team, risk memo, janitor drift review, your approval</div>
+  </div>
+  <div class="subsys">
+    <div class="panel"><h3><span class="mono">1</span>Instructions &amp; context</h3><p class="small">AGENTS.md is a short map. One versioned charter per agent. Context packs (≤ 30k tokens) are compiled from the database by code and hashed, so we can reproduce exactly what an agent saw. Stable prefix is prompt-cached.</p></div>
+    <div class="panel"><h3><span class="mono">2</span>Tools, least privilege</h3><p class="small">Research agents are read-only. Only five desks get web search, on allow-listed domains. Numbers come from tools, never mental math. The structurer picks candidate IDs. No model can reach the broker.</p></div>
+    <div class="panel"><h3><span class="mono">3</span>State &amp; memory</h3><p class="small">Postgres is the system of record. Working memory = context pack; episodic = prior reports and outcomes; semantic = lessons you accepted. Runs checkpoint per step and resume after a crash.</p></div>
+    <div class="panel"><h3><span class="mono">4</span>Orchestration</h3><p class="small">A fixed DAG in code with per-step budgets for tool calls, dollars and time. Remediation is appended as a new turn; history is never edited. A failing desk degrades to last week's report, flagged stale.</p></div>
+    <div class="panel"><h3><span class="mono">5</span>Verification</h3><p class="small">Schema, citation, freshness and numeric sensors on every output; policy and stress engines on every proposal; adversarial review on every plan.</p></div>
+    <div class="panel"><h3><span class="mono">6</span>Guardrails</h3><p class="small">Limits in versioned YAML enforced by code. Research / paper / live modes. Circuit breakers on drawdown, daily loss, VIX, stale data and run cost. Kill switch. Idempotent orders.</p></div>
+    <div class="panel"><h3><span class="mono">7</span>Observability</h3><p class="small">Every run, step, tool call, token, cache hit and dollar recorded. Lineage from an order back to the raw payload hash that justified it.</p></div>
+    <div class="panel"><h3><span class="mono">8</span>Evals &amp; learning</h3><p class="small">Crisis replays on every prompt, tool or policy change. Every view is falsifiable and Brier-scored. Post-mortems propose lessons; you accept them. The janitor removes drift weekly.</p></div>
+  </div>
+  <div class="panel">
+    <h3>Golden rules</h3>
+    <ol class="rules">
+      <li>Models judge; code computes, controls the flow and enforces limits.</li>
+      <li>If it is not in the database with provenance, it does not exist.</li>
+      <li>Only the Data Steward calls data APIs, and never downloads the same thing twice.</li>
+      <li>Every number an agent states cites stored evidence, and the citation is checked.</li>
+      <li>Outputs are typed contracts; invalid output goes back with a remediation note.</li>
+      <li>Fewest tools per agent; research is read-only; no model reaches the broker.</li>
+      <li>Risk limits change only through a PR you approve.</li>
+      <li>You approve every trade until you decide otherwise.</li>
+      <li>Replays are point-in-time; no look-ahead.</li>
+      <li>Every step is reproducible from its stored context hash.</li>
+      <li>Every view is falsifiable and gets scored.</li>
+      <li>Clean up drift continuously, in small changes.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= DATA ================= -->
+<section id="data">
+  <div class="sec-head">
+    <span class="eyebrow">06 · Data layer</span>
+    <h2>Download once, reuse forever</h2>
+    <p>Everything lands in a six-schema Postgres database (<span class="mono">db/schema/001_core.sql</span>, validated on PostgreSQL 16). Agents never fetch; they read stored, point-in-time data.</p>
+  </div>
+  <div class="pipe">
+    <div><span class="k">1 · due?</span><b>Release calendar</b><p>Fetch only series whose <span class="mono">next_due_at</span> has passed.</p></div>
+    <div><span class="k">2 · delta</span><b>New rows only</b><p>Ask for observations after <span class="mono">last_obs</span>, plus a short revision window.</p></div>
+    <div><span class="k">3 · same request?</span><b>Request hash</b><p>Identical request inside its TTL is skipped.</p></div>
+    <div><span class="k">4 · same bytes?</span><b>SHA-256 blob</b><p>Identical payload is stored once.</p></div>
+    <div><span class="k">5 · vintage</span><b>Append, never overwrite</b><p>Revisions add rows, so any past date can be replayed honestly.</p></div>
+    <div><span class="k">6 · read</span><b>Agents read the DB</b><p>Missing data becomes a queued <span class="mono">data_request</span>.</p></div>
+  </div>
+  <div class="schemas">
+    <div class="panel"><h3>ref</h3><p class="small">What exists and when it is due</p><div class="tbls"><span>data_source</span><span>series</span><span>instrument</span><span>calendar_event</span></div></div>
+    <div class="panel"><h3>raw</h3><p class="small">Every request, every payload</p><div class="tbls"><span>fetch_log</span><span>blob</span></div></div>
+    <div class="panel"><h3>mkt</h3><p class="small">Point-in-time market and macro data</p><div class="tbls"><span>observation</span><span>observation_asof()</span><span>price_bar</span><span>futures_curve_point</span><span>option_chain_snapshot</span><span>option_quote</span><span>vol_metrics</span></div></div>
+    <div class="panel"><h3>research</h3><p class="small">What agents concluded and why</p><div class="tbls"><span>report</span><span>signal</span><span>evidence</span><span>view</span><span>geo_event</span><span>document</span><span>derived_metric</span></div></div>
+    <div class="panel"><h3>pm</h3><p class="small">Portfolio decisions and results</p><div class="tbls"><span>regime_assessment</span><span>target_exposure</span><span>trade_proposal</span><span>risk_check</span><span>approval</span><span>order_ticket</span><span>fill</span><span>position</span><span>position_mark</span><span>nav_daily</span></div></div>
+    <div class="panel"><h3>ops</h3><p class="small">Harness telemetry and memory</p><div class="tbls"><span>run</span><span>agent_step</span><span>tool_call</span><span>validation_result</span><span>lesson</span><span>eval_case</span><span>eval_result</span><span>incident</span><span>kill_switch</span></div></div>
+  </div>
+  <div class="panel">
+    <h3>Sources</h3>
+    <div class="sources">
+      <span class="src">FRED / ALFRED <i class="free">free key</i></span>
+      <span class="src">US Treasury FiscalData <i class="free">free</i></span>
+      <span class="src">New York Fed (GSCPI, SOFR, term premium) <i class="free">free</i></span>
+      <span class="src">EIA <i class="free">free key</i></span>
+      <span class="src">CFTC Commitments of Traders <i class="free">free</i></span>
+      <span class="src">Cboe vol indices <i class="free">free</i></span>
+      <span class="src">Shiller US CAPE <i class="free">free</i></span>
+      <span class="src">Geopolitical Risk Index <i class="free">free</i></span>
+      <span class="src">OECD · BIS · IMF · World Bank <i class="free">free</i></span>
+      <span class="src">Atlanta Fed GDPNow <i class="free">free</i></span>
+      <span class="src">Massive (Polygon) chains and bars <i class="conn">connected</i> <i class="paid">paid</i></span>
+      <span class="src">Interactive Brokers <i class="conn">connected</i></span>
+      <span class="src">Global CAPE provider <i class="paid">paid · TBD</i></span>
+      <span class="src">Web search, allow-listed domains <i class="paid">per use</i></span>
+    </div>
+    <p class="small">Massive and Interactive Brokers connectors are already attached to your Claude account; the app itself will use their APIs with keys you provide.</p>
+  </div>
+</section>
+
+<!-- ================= REGIME ================= -->
+<section id="regime">
+  <div class="sec-head">
+    <span class="eyebrow">07 · From macro to exposure</span>
+    <h2>Regime probabilities × playbook</h2>
+    <p>The regime is never a single label. Four probabilities weight a playbook of sleeve scores (+2 strongly bullish to −2 strongly bearish). Code applies the modifiers; the CIO reviews them.</p>
+  </div>
+  <div class="grid-2">
+    <div class="quad" aria-label="Growth and inflation regime map">
+      <span></span><span class="ax">Inflation falling</span><span class="ax">Inflation rising</span>
+      <span class="ax v">Growth rising</span>
+      <div class="qc g"><b>Goldilocks</b><p>Sell puts on equity indices and EM; condors on crude.</p></div>
+      <div class="qc r"><b>Reflation</b><p>Sell puts on crude, silver, EM and cyclicals; call spreads on TLT.</p></div>
+      <span class="ax v">Growth falling</span>
+      <div class="qc d"><b>Deflationary bust</b><p>Call spreads on equities and crude; sell puts on TLT and gold.</p></div>
+      <div class="qc s"><b>Stagflation</b><p>Call spreads on equities; sell puts on gold; small crude puts if supply-driven.</p></div>
+    </div>
+    <div class="panel">
+      <h3>Modifiers</h3>
+      <ul class="clean small">
+        <li><strong style="color:var(--ink)">Valuation.</strong> CAPE above its 80th percentile (20-yr): short-put size × 0.6, max 12Δ. Below the 30th: up to × 1.2.</li>
+        <li><strong style="color:var(--ink)">Liquidity.</strong> 13-week global liquidity impulse: ±0.5 to risk-asset scores.</li>
+        <li><strong style="color:var(--ink)">Stress.</strong> HY spreads widening fast or VIX curve inverted: spreads only, size × 0.5.</li>
+        <li><strong style="color:var(--ink)">Vol richness.</strong> Size scales with the volatility-premium z-score; IV rank under 20 means small or skip.</li>
+        <li><strong style="color:var(--ink)">Geopolitics.</strong> Severity-4+ event touching a sleeve: lower delta, defined risk only.</li>
+        <li><strong style="color:var(--ink)">Disagreement.</strong> Desks split on a sleeve: conviction capped at 0.5.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="scroll-x">
+    <table class="heat">
+      <thead><tr><th>Sleeve</th><th class="n">Goldilocks</th><th class="n">Reflation</th><th class="n">Stagflation</th><th class="n">Deflationary bust</th></tr></thead>
+      <tbody>
+        <tr><td>US equity index</td><td class="c h2p">+2</td><td class="c h1p">+1</td><td class="c h1n">−1</td><td class="c h2n">−2</td></tr>
+        <tr><td>Intl developed equity</td><td class="c h1p">+1</td><td class="c h1p">+1</td><td class="c h1n">−1</td><td class="c h2n">−2</td></tr>
+        <tr><td>EM equity</td><td class="c h1p">+1</td><td class="c h2p">+2</td><td class="c h1n">−1</td><td class="c h2n">−2</td></tr>
+        <tr><td>Crude oil</td><td class="c h0">0</td><td class="c h2p">+2</td><td class="c h1p">+1</td><td class="c h2n">−2</td></tr>
+        <tr><td>Natural gas</td><td class="c h0">0</td><td class="c h1p">+1</td><td class="c h1p">+1</td><td class="c h1n">−1</td></tr>
+        <tr><td>Gold</td><td class="c h1p">+1</td><td class="c h1p">+1</td><td class="c h2p">+2</td><td class="c h1p">+1</td></tr>
+        <tr><td>Silver</td><td class="c h1p">+1</td><td class="c h2p">+2</td><td class="c h0">0</td><td class="c h1n">−1</td></tr>
+        <tr><td>Treasuries (TLT, optional)</td><td class="c h1p">+1</td><td class="c h2n">−2</td><td class="c h1n">−1</td><td class="c h2p">+2</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <h3>Worked example: probabilities</h3>
+      <p class="small">Illustrative inputs, not today's assessment.</p>
+      <div class="probs">
+        <div class="prow"><span>Goldilocks</span><div class="ptrack"><div class="pbar" style="width:20%;background:var(--r-gold)"></div></div><span class="num">20%</span></div>
+        <div class="prow"><span>Reflation</span><div class="ptrack"><div class="pbar" style="width:30%;background:var(--r-refl)"></div></div><span class="num">30%</span></div>
+        <div class="prow"><span>Stagflation</span><div class="ptrack"><div class="pbar" style="width:35%;background:var(--r-stag)"></div></div><span class="num">35%</span></div>
+        <div class="prow"><span>Deflation</span><div class="ptrack"><div class="pbar" style="width:15%;background:var(--r-defl)"></div></div><span class="num">15%</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Blended sleeve scores, before modifiers</h3>
+      <p class="small">Scale −2 to +2. Dashed lines mark ±0.5: beyond them the sleeve takes a side; inside, a condor if premium is rich, otherwise stand aside.</p>
+      <div class="blend">
+        <div class="brow"><span>Gold</span><div class="btrack"><span class="bth" style="left:37.5%"></span><span class="bth" style="left:62.5%"></span><div class="bbar pos" style="width:33.75%"></div></div><span class="num">+1.35</span><span class="act bull">Sell GLD puts</span></div>
+        <div class="brow"><span>Crude oil</span><div class="btrack"><span class="bth" style="left:37.5%"></span><span class="bth" style="left:62.5%"></span><div class="bbar pos" style="width:16.25%"></div></div><span class="num">+0.65</span><span class="act bull">Small put spread</span></div>
+        <div class="brow"><span>Silver</span><div class="btrack"><span class="bth" style="left:37.5%"></span><span class="bth" style="left:62.5%"></span><div class="bbar pos" style="width:16.25%"></div></div><span class="num">+0.65</span><span class="act bull">Put spread only</span></div>
+        <div class="brow"><span>Natural gas</span><div class="btrack"><span class="bth" style="left:37.5%"></span><span class="bth" style="left:62.5%"></span><div class="bbar pos" style="width:12.5%"></div></div><span class="num">+0.50</span><span class="act bull">Edge case: spread only</span></div>
+        <div class="brow"><span>EM equity</span><div class="btrack"><span class="bth" style="left:37.5%"></span><span class="bth" style="left:62.5%"></span><div class="bbar pos" style="width:3.75%"></div></div><span class="num">+0.15</span><span class="act neu">Neutral</span></div>
+        <div class="brow"><span>US equity index</span><div class="btrack"><span class="bth" style="left:37.5%"></span><span class="bth" style="left:62.5%"></span><div class="bbar pos" style="width:1.25%"></div></div><span class="num">+0.05</span><span class="act neu">Condor or stand aside</span></div>
+        <div class="brow"><span>Intl developed</span><div class="btrack"><span class="bth" style="left:37.5%"></span><span class="bth" style="left:62.5%"></span><div class="bbar neg" style="width:3.75%"></div></div><span class="num">−0.15</span><span class="act neu">Neutral</span></div>
+        <div class="brow"><span>Treasuries (TLT)</span><div class="btrack"><span class="bth" style="left:37.5%"></span><span class="bth" style="left:62.5%"></span><div class="bbar neg" style="width:11.25%"></div></div><span class="num">−0.45</span><span class="act neu">Neutral, leaning bearish</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RISK ================= -->
+<section id="risk">
+  <div class="sec-head">
+    <span class="eyebrow">08 · Implementation &amp; risk</span>
+    <h2>Out-of-the-money, defined where it matters, capped everywhere</h2>
+    <p>All limits live in <span class="mono">config/risk_policy.yaml</span> and are enforced by code. A block cannot be overridden by any agent.</p>
+  </div>
+  <div class="scroll-x">
+    <table>
+      <thead><tr><th>View</th><th>Structure</th><th>Short strike</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bullish</strong></td><td>Short put, or put credit spread</td><td class="num">10–25Δ by conviction</td><td>Naked puts only on index/ETF, ≤ 10% notional each, stress-tested. NG and silver: spreads only.</td></tr>
+        <tr><td><strong>Bearish</strong></td><td>Call credit spread</td><td class="num">10–20Δ</td><td>No naked calls. Upside gaps in commodities are unbounded.</td></tr>
+        <tr><td><strong>Neutral, rich premium</strong></td><td>Iron condor</td><td class="num">10–16Δ each side</td><td>Only when IV rank is above 30.</td></tr>
+        <tr><td><strong>No edge</strong></td><td>Stand aside</td><td>–</td><td>Collateral still earns the hurdle.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <h3>Entry and management</h3>
+      <ul class="ticks small">
+        <li>45 DTE target (21–75 allowed); expiries laddered, ≤ 30% of buying power in any week.</li>
+        <li>Conviction 0.5–0.6 → ~10Δ; 0.6–0.75 → ~16Δ; above 0.75 → 20–25Δ.</li>
+        <li>Take profit at 50% of credit. Exit at 21 DTE. Stop at a loss of 2× credit.</li>
+        <li>Defend when the short strike passes 0.35Δ. Roll only for a net credit.</li>
+        <li>No new short-vol risk 24h before FOMC, CPI or OPEC in affected sleeves; 72h before major elections.</li>
+        <li>Liquidity: open interest ≥ 500, bid-ask ≤ 10% of mid, spreads must pay ≥ 20% of width.</li>
+        <li>Phase 1 products: XSP/SPX, QQQ, IWM, EFA, EEM, FEZ, EWJ, FXI, INDA, EWZ, GLD, SLV, USO, UNG, XLE, TLT. Futures options in Phase 2.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Book limits</h3>
+      <div class="scroll-x" style="border:0">
+        <table>
+          <tbody>
+            <tr><td>Buying power used</td><td class="n">25–40% · max 50%</td></tr>
+            <tr><td>Beta-weighted delta</td><td class="n">−30% to +60% of NAV</td></tr>
+            <tr><td>Short vega</td><td class="n">≤ $6,000 per vol pt</td></tr>
+            <tr><td>Single underlying</td><td class="n">≤ 25% of buying power</td></tr>
+            <tr><td>Correlated cluster</td><td class="n">≤ 45% of buying power</td></tr>
+            <tr><td>Defined-risk position max loss</td><td class="n">≤ 2% of NAV</td></tr>
+            <tr><td>Collateral in T-bills</td><td class="n">≥ 85% of NAV</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <h3>Stress scenarios: maximum allowed loss (% of NAV)</h3>
+      <p class="small">Full revaluation of every leg after the proposed trades.</p>
+      <div class="limits">
+        <div class="lrow"><span>Equities −20%, IV +25 pts</span><div class="ltrack"><div class="lbar" style="width:100%"></div></div><span class="num">12%</span></div>
+        <div class="lrow"><span>Equities −10% gap</span><div class="ltrack"><div class="lbar" style="width:50%"></div></div><span class="num">6%</span></div>
+        <div class="lrow"><span>Oil +40%</span><div class="ltrack"><div class="lbar" style="width:41.67%"></div></div><span class="num">5%</span></div>
+        <div class="lrow"><span>Oil −35%</span><div class="ltrack"><div class="lbar" style="width:41.67%"></div></div><span class="num">5%</span></div>
+        <div class="lrow"><span>Rates +100bp</span><div class="ltrack"><div class="lbar" style="width:41.67%"></div></div><span class="num">5%</span></div>
+        <div class="lrow"><span>Dollar spike +6%</span><div class="ltrack"><div class="lbar" style="width:41.67%"></div></div><span class="num">5%</span></div>
+        <div class="lrow"><span>Equities melt-up +10%</span><div class="ltrack"><div class="lbar" style="width:33.33%"></div></div><span class="num">4%</span></div>
+        <div class="lrow"><span>Gold −12%, silver −22%</span><div class="ltrack"><div class="lbar" style="width:33.33%"></div></div><span class="num">4%</span></div>
+        <div class="lrow"><span>Vol × 1.6, no price move</span><div class="ltrack"><div class="lbar" style="width:33.33%"></div></div><span class="num">4%</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Circuit breakers</h3>
+      <div class="ladder">
+        <div class="rung w"><span class="t">DD −5%</span><span class="small">Halve all new risk</span></div>
+        <div class="rung w"><span class="t">DD −8%</span><span class="small">No new positions</span></div>
+        <div class="rung b"><span class="t">DD −12%</span><span class="small">De-risk to half buying power; your review required</span></div>
+        <div class="rung w"><span class="t">Day −2.5%</span><span class="small">Halt new risk for the rest of the day</span></div>
+        <div class="rung w"><span class="t">VIX ≥ 35</span><span class="small">No new naked puts; spreads only</span></div>
+        <div class="rung i"><span class="t">Stale data</span><span class="small">Critical series older than 2× its TTL: research-only mode</span></div>
+        <div class="rung i"><span class="t">Run cost</span><span class="small">Over budget: stop the run, open an incident</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PREVIEW ================= -->
+<section id="preview">
+  <div class="sec-head">
+    <span class="eyebrow">09 · What you will use</span>
+    <h2>Dashboard preview: Command Center</h2>
+    <p>The live app (rebuilt from the existing React front end) has seven pages: Command Center, Regime &amp; Macro, Research Desk, Investment Committee, Positions &amp; Risk, Lineage, and Harness Ops. This mock shows the first one.</p>
+  </div>
+  <div class="mock">
+    <span class="mock-flag">Illustrative sample · not market data · not your account</span>
+    <div class="tiles">
+      <div class="tile"><span class="k">NAV</span><span class="v">$1,012,400</span><span class="s">sample</span></div>
+      <div class="tile"><span class="k">Excess vs Fed funds, YTD</span><span class="v" style="color:var(--good)">+1.9%</span><span class="s">after costs</span></div>
+      <div class="tile"><span class="k">Drawdown from peak</span><span class="v">−1.4%</span><span class="s"><span class="chip ok">breakers clear</span></span></div>
+      <div class="tile"><span class="k">Theta per day</span><span class="v">+$410</span><span class="s">vega −$3,100 / pt</span></div>
+    </div>
+    <div class="mock-grid">
+      <div class="panel">
+        <h3>Book usage</h3>
+        <div style="display:grid;gap:6px"><div class="small">Buying power used <strong class="num" style="color:var(--ink)">33%</strong> · target 25–40% · cap 50%</div><div class="meter"><span style="width:33%"></span><i style="left:50%"></i></div></div>
+        <div style="display:grid;gap:6px"><div class="small">Beta-weighted delta <strong class="num" style="color:var(--ink)">+18% of NAV</strong> · limits −30% / +60%</div><div class="meter"><span style="width:53.3%;background:var(--bronze)"></span><i style="left:100%"></i></div></div>
+        <div style="display:grid;gap:6px"><div class="small">Worst stress scenario <strong class="num" style="color:var(--ink)">−7.9% of NAV</strong> · limit 12%</div><div class="meter"><span style="width:65.8%;background:var(--warn)"></span><i style="left:100%"></i></div></div>
+      </div>
+      <div class="panel">
+        <h3>Regime, this week (sample)</h3>
+        <div class="probs">
+          <div class="prow"><span>Goldilocks</span><div class="ptrack"><div class="pbar" style="width:20%;background:var(--r-gold)"></div></div><span class="num">20%</span></div>
+          <div class="prow"><span>Reflation</span><div class="ptrack"><div class="pbar" style="width:30%;background:var(--r-refl)"></div></div><span class="num">30%</span></div>
+          <div class="prow"><span>Stagflation</span><div class="ptrack"><div class="pbar" style="width:35%;background:var(--r-stag)"></div></div><span class="num">35%</span></div>
+          <div class="prow"><span>Deflation</span><div class="ptrack"><div class="pbar" style="width:15%;background:var(--r-defl)"></div></div><span class="num">15%</span></div>
+        </div>
+        <p class="small">Change risk next 45 days: <strong style="color:var(--ink)">moderate</strong> · Data freshness: <span class="chip ok">78 of 80 fresh</span> <span class="chip warn">2 late</span></p>
+      </div>
+    </div>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>Underlying</th><th>Structure</th><th class="n">Short Δ</th><th class="n">DTE</th><th class="n">% of max profit</th><th>Trigger</th></tr></thead>
+        <tbody>
+          <tr><td>XSP</td><td>Put credit spread</td><td class="n">0.16</td><td class="n">38</td><td class="n">+22%</td><td><span class="chip neu">none</span></td></tr>
+          <tr><td>GLD</td><td>Short put</td><td class="n">0.11</td><td class="n">31</td><td class="n">+51%</td><td><span class="chip ok">take profit</span></td></tr>
+          <tr><td>USO</td><td>Put credit spread</td><td class="n">0.14</td><td class="n">44</td><td class="n">+9%</td><td><span class="chip neu">none</span></td></tr>
+          <tr><td>EFA</td><td>Iron condor</td><td class="n">0.12</td><td class="n">24</td><td class="n">+35%</td><td><span class="chip warn">21-DTE exit in 3 days</span></td></tr>
+          <tr><td>TLT</td><td>Call credit spread</td><td class="n">0.29</td><td class="n">40</td><td class="n">−12%</td><td><span class="chip warn">delta watch</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ROADMAP ================= -->
+<section id="roadmap">
+  <div class="sec-head">
+    <span class="eyebrow">10 · Build order</span>
+    <h2>Roadmap</h2>
+    <p>Each phase ends on a measurable exit test. Live trading is opt-in and only after paper results meet the promotion bar.</p>
+  </div>
+  <div class="phases">
+    <div class="phase now"><span class="p">Phase 0 · now</span><h3>Design</h3><p class="small">This blueprint, schema, configs, contracts.</p><p class="exit">Exit: your approval and answers.</p></div>
+    <div class="phase"><span class="p">Phase 1</span><h3>Data plane</h3><p class="small">Migration, Data Steward, ~12 adapters, derived metrics, freshness page.</p><p class="exit">Exit: a second ingest downloads nothing; adapter contract tests pass.</p></div>
+    <div class="phase"><span class="p">Phase 2</span><h3>Research desk</h3><p class="small">Charters, tools, context packs, validators, traces, 11 desks.</p><p class="exit">Exit: ≥ 95% valid on first try; 100% of citations resolve.</p></div>
+    <div class="phase"><span class="p">Phase 3</span><h3>Committee</h3><p class="small">Regime model and strategist, CIO, red team, IC page.</p><p class="exit">Exit: crisis replays give sensible regimes; red team flags the known risk.</p></div>
+    <div class="phase"><span class="p">Phase 4</span><h3>Implementation</h3><p class="small">Candidates, structurer, policy and stress engines, approvals, paper execution.</p><p class="exit">Exit: weekly run reaches paper fills; every rule has a failing-case test.</p></div>
+    <div class="phase"><span class="p">Phase 5</span><h3>Learning</h3><p class="small">Monitor, attribution, calibration, lessons, janitor, alerts.</p><p class="exit">Exit: 13 weeks of paper trading.</p></div>
+    <div class="phase"><span class="p">Phase 6 · opt-in</span><h3>Live</h3><p class="small">Per-ticket approval, starting at 25% of target size.</p><p class="exit">Bar: ≥ 30 closed trades, positive excess after costs, DD &lt; 8%, zero hard breaches, Brier ≤ 0.24.</p></div>
+  </div>
+</section>
+
+<!-- ================= QUESTIONS ================= -->
+<section id="questions">
+  <div class="sec-head">
+    <span class="eyebrow">11 · Decisions</span>
+    <h2>What I need from you</h2>
+    <p>Reply with answers by number, or "defaults are fine". The design already assumes each default.</p>
+  </div>
+  <div class="qs">
+    <div class="qgroup">Account and risk</div>
+    <div class="qrow"><span class="qn">Q1</span><span>Broker, account type, options level, futures permission, Reg-T or Portfolio Margin?</span><span class="qd"><b>Default</b>Interactive Brokers, taxable, Reg-T to start, IBKR paper account first</span></div>
+    <div class="qrow"><span class="qn">Q2</span><span>Largest drawdown you would tolerate; return target; typical buying power?</span><span class="qd"><b>Default</b>12% · +4–8% over Fed funds · 25–40% (cap 50%)</span></div>
+    <div class="qrow"><span class="qn">Q3</span><span>Naked puts on index/ETF? Naked calls?</span><span class="qd"><b>Default</b>Naked puts capped and stress-tested; never naked calls</span></div>
+    <div class="qrow"><span class="qn">Q4</span><span>ETF/index options first, or futures options from day one?</span><span class="qd"><b>Default</b>ETF/index first; futures options in Phase 2</span></div>
+    <div class="qrow"><span class="qn">Q5</span><span>Add a Treasuries (TLT) sleeve? Trade anything else?</span><span class="qd"><b>Default</b>Add TLT; copper, USD, yen and Bitcoin watch-only</span></div>
+    <div class="qrow"><span class="qn">Q6</span><span>Withdrawals planned, holdings to hedge, restricted tickers, exclusions?</span><span class="qd"><b>Default</b>None</span></div>
+    <div class="qrow"><span class="qn">Q7</span><span>Taxable account? Prefer Section 1256 products (XSP/SPX, futures options)?</span><span class="qd"><b>Default</b>Yes; XSP/SPX for the US sleeve</span></div>
+    <div class="qgroup">Data and cost</div>
+    <div class="qrow"><span class="qn">Q8</span><span>Your Massive plan (does it include options)? Pay for a global CAPE source or use a computed proxy?</span><span class="qd"><b>Default</b>Free sources + your Massive plan; computed proxy for global CAPE</span></div>
+    <div class="qrow"><span class="qn">Q9</span><span>Opus 5.5 for every agent, or a cheaper model for bulk news triage? Monthly model budget?</span><span class="qd"><b>Default</b>Opus 5.5 everywhere; $300/month cap with an 80% alert</span></div>
+    <div class="qgroup">Operations</div>
+    <div class="qrow"><span class="qn">Q10</span><span>Should take-profit closes ever execute automatically once live is proven?</span><span class="qd"><b>Default</b>No; revisit after 3 months live</span></div>
+    <div class="qrow"><span class="qn">Q11</span><span>Weekly IC Sunday evening plus daily checks? Time zone? Email, Slack or push?</span><span class="qd"><b>Default</b>As proposed, US Eastern, email summary + push for breakers</span></div>
+    <div class="qrow"><span class="qn">Q12</span><span>Inject your own discretionary views for the committee to address?</span><span class="qd"><b>Default</b>Yes, optional, never bypassing limits</span></div>
+    <div class="qrow"><span class="qn">Q13</span><span>Keep React + Supabase and add a Python harness? Where should it run?</span><span class="qd"><b>Default</b>Yes; one small cloud VM with Docker Compose</span></div>
+  </div>
+</section>
+
+<footer>
+  <p class="small">Repository files: <span class="mono">docs/design/DESIGN.md</span> · <span class="mono">docs/design/HARNESS.md</span> · <span class="mono">docs/design/OPEN_QUESTIONS.md</span> · <span class="mono">config/agents.yaml</span> · <span class="mono">config/risk_policy.yaml</span> · <span class="mono">config/universe.yaml</span> · <span class="mono">config/data_sources.yaml</span> · <span class="mono">contracts/research_report.schema.json</span> · <span class="mono">db/schema/001_core.sql</span></p>
+  <p class="small">Decision-support design, not investment advice. Selling options carries large tail risk; the limits above bound it but cannot remove it.</p>
+</footer>
+</main>

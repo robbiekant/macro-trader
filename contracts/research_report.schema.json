@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "macro-trader/contracts/research_report/v1",
+  "title": "ResearchReport",
+  "description": "The one output every research agent returns. Validated by the harness before it is stored; a failure is sent back to the agent as a remediation message.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["agent_id", "as_of", "summary", "stance", "key_findings", "signals", "views", "risks", "what_would_change_my_mind", "data_used", "confidence"],
+  "properties": {
+    "agent_id": {"type": "string", "pattern": "^[a-z_]+$"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "summary": {"type": "string", "maxLength": 1200, "description": "<= 150 words, plain language"},
+    "stance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "label"],
+      "properties": {
+        "score": {"type": "number", "minimum": -3, "maximum": 3, "description": "-3 very bearish/contracting .. +3 very bullish/expanding"},
+        "label": {"type": "string", "maxLength": 60},
+        "change_vs_prior": {"type": "number", "minimum": -6, "maximum": 6}
+      }
+    },
+    "key_findings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim", "evidence"],
+        "properties": {
+          "claim": {"type": "string", "maxLength": 400},
+          "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}}
+        }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "value", "direction", "strength", "horizon_days"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "sleeve": {"type": "string"},
+          "value": {"type": "number"},
+          "direction": {"type": "integer", "enum": [-1, 0, 1]},
+          "strength": {"type": "number", "minimum": -3, "maximum": 3},
+          "horizon_days": {"type": "integer", "minimum": 1, "maximum": 365}
+        }
+      }
+    },
+    "regime_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "growth": {"type": "number", "minimum": -3, "maximum": 3},
+        "inflation": {"type": "number", "minimum": -3, "maximum": 3},
+        "liquidity": {"type": "number", "minimum": -3, "maximum": 3},
+        "stress": {"type": "number", "minimum": -3, "maximum": 3}
+      }
+    },
+    "views": {
+      "type": "array",
+      "description": "Falsifiable forecasts. Scored later for calibration.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["instrument_id", "statement", "direction", "probability", "horizon_days", "resolution_rule"],
+        "properties": {
+          "instrument_id": {"type": "string"},
+          "statement": {"type": "string", "maxLength": 300},
+          "direction": {"type": "integer", "enum": [-1, 0, 1]},
+          "probability": {"type": "number", "minimum": 0, "maximum": 1},
+          "horizon_days": {"type": "integer", "minimum": 5, "maximum": 180},
+          "resolution_rule": {"type": "string", "maxLength": 300}
+        }
+      }
+    },
+    "risks": {"type": "array", "items": {"type": "string", "maxLength": 300}, "maxItems": 6},
+    "what_would_change_my_mind": {"type": "array", "items": {"type": "string", "maxLength": 300}, "minItems": 1, "maxItems": 5},
+    "data_used": {
+      "type": "array",
+      "description": "Every series/metric read, with the last observation date seen. Checked against freshness rules.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "last_obs"],
+        "properties": {
+          "id": {"type": "string"},
+          "last_obs": {"type": "string", "format": "date"}
+        }
+      }
+    },
+    "data_requests": {
+      "type": "array",
+      "description": "Series the agent wanted but could not find. Queued for the Data Steward; never fetched by the agent.",
+      "items": {"type": "string", "maxLength": 200}
+    },
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "series_id": {"type": "string"},
+        "obs_date": {"type": "string", "format": "date"},
+        "value": {"type": "number"},
+        "metric_id": {"type": "string"},
+        "doc_id": {"type": "integer"}
+      },
+      "anyOf": [
+        {"required": ["series_id", "obs_date", "value"]},
+        {"required": ["metric_id", "obs_date", "value"]},
+        {"required": ["doc_id"]}
+      ]
+    }
+  }
+}
