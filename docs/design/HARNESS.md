@@ -125,8 +125,8 @@ The harness runs in Claude Code cloud sessions on your Pro plan (`config/runtime
 |---|---|
 | Instructions & context | `AGENTS.md` (loaded via `CLAUDE.md`), one `.claude/agents/<id>.md` sub-agent per agent, context pack passed in the step prompt |
 | Tools | A local MCP server (`harness/mcp/`) exposes only read-only database tools and `submit_report`; `--allowedTools` limits each step to them (plus web tools for the five web desks); scheduled tasks attach no claude.ai connectors |
-| Typed output | `--json-schema contracts/<contract>.schema.json`; `submit_report` re-validates schema and citations against the database and returns remediation text on failure |
-| Orchestration | Python DAG runs one `claude -p` per agent step, so code, not the model, decides what runs next |
+| Typed output | Each agent hands its report to `harness submit` (code), which validates it against `contracts/` (schema, citations against the database, freshness) and returns a fix list on failure; local runs also pass `--json-schema` |
+| Orchestration | In the cloud, the session's lead Claude runs the run's skill and asks `harness next` (code) for the only step allowed next; every step checks its prerequisites in the database, so code enforces the order. Locally, a Python DAG runs one `claude -p` per step. GitHub Actions is never called by an agent |
 | Guardrails | `--permission-mode dontAsk` and `--permission-prompts none` deny anything not allow-listed; hooks log every tool call to `ops.tool_call`; risk limits and the paper broker are plain code no agent can call |
 | Observability | `--output-format json` returns session ID, usage and an API-equivalent cost estimate per step, stored in `ops.agent_step` |
 | State | Supabase Postgres; the cloud container is disposable |

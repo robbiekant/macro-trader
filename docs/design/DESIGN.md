@@ -131,7 +131,8 @@ Decided 2026-11-02: everything runs in **Claude Code cloud sessions on your Clau
 | Run | Where | When (ET) | What happens |
 |---|---|---|---|
 | **Daily ingest + monitor** | GitHub Actions (code only, no Claude usage) | Weekdays 06:41, 16:47, 17:43 | Due series, vol metrics, position marks, management triggers, risk check |
-| **Event detector** | GitHub Actions | Weekdays 17:53 | Flags VIX +25%, geopolitical-risk spike, crude ±8%, FOMC/CPI surprise; emails you, and you start an event run if you want one |
+| **Paper fills** | GitHub Actions | Weekdays 09:47 | Fills only tickets you approved, at a limit price from a fresh option snapshot |
+| **Event detector** | GitHub Actions | Weekdays 17:53 | Flags VIX +25%, geopolitical-risk spike, crude ±8%, FOMC/CPI surprise; opens a GitHub issue (GitHub emails you), and you start an event run if you want one |
 | **Research A** | Claude Code cloud scheduled task | Sat 13:19 | Liquidity, rates & credit, growth & inflation, valuation, volatility, US equities |
 | **Research B** | Claude Code cloud scheduled task | Sat 19:37 | Geopolitics, supply chain, energy, metals, international equities |
 | **Committee** | Claude Code cloud scheduled task | Sun 14:41 | Regime → CIO ↔ red team → structurer → risk memo. Ends with a push notification; you approve or reject each ticket by replying in that session, and approved tickets are paper-filled Monday |
@@ -238,7 +239,7 @@ Schema: [`db/schema/001_core.sql`](../../db/schema/001_core.sql) (validated on P
 
 | Concern | Choice | Why |
 |---|---|---|
-| Agent runtime | **Claude Code** in Anthropic's cloud (claude.ai/code), signed in with your **Claude Pro plan**. The orchestrator runs one `claude -p` step per agent with `--json-schema` (typed output), `--mcp-config` (read-only harness tools), `--allowedTools`, `--permission-mode dontAsk` and `--permission-prompts none` | No API key and no per-token bill; Claude Code already provides the agent loop, sub-agents, permissions and hooks the harness needs |
+| Agent runtime | **Claude Code** in Anthropic's cloud (claude.ai/code), signed in with your **Claude Pro plan**. A scheduled task starts a fresh session; its lead Claude runs the run's skill, starts each agent as a sub-agent with its own tool allow-list, and asks `harness next` (code) which step is allowed next. Every report passes `harness submit` (code) validation | No API key and no per-token bill; Claude Code already provides the agent loop, sub-agents, permissions and hooks the harness needs |
 | Model | Claude Opus 5.5, Pro-budget effort (low for research desks, medium for committee); options if limits bite are in `config/runtime.yaml` | Best judgment per unit of plan allowance |
 | Contracts | Pydantic v2 models exported to JSON Schema | The same schema validates agent output, database rows and UI types |
 | Orchestration | Small in-repo Python DAG runner; run and step checkpoints in `ops.*` | A run that hits a usage limit resumes from the last finished step after the reset |

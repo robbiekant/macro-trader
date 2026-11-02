@@ -30,7 +30,13 @@ runner:
     - run research desks on claude-sonnet-5-5
     - run half the desks each week (alternating)
     - upgrade plan
-  per_step_cli:                              # one claude -p call per agent step, launched by the orchestrator
+  cloud_session:                             # how one scheduled cloud run works
+    conductor: "the session's lead Claude runs one skill per run: /research-a, /research-b, /committee, /monthly"
+    gate: "python -m harness next names the only step allowed next; every step checks its prerequisites in the database"
+    agents: ".claude/agents/<id>.md sub-agents, each with its own tool allow-list"
+    validation: "python -m harness submit <agent> <report.json>: schema, citations against the database, freshness; fix list on failure, max 2 retries"
+    github_actions: "never called; both runners check out the same code and share state only through Supabase"
+  local_cli:                                 # same harness on your own computer: one claude -p call per agent step
     - "-p"
     - "--output-format json"
     - "--json-schema contracts/<contract>.schema.json"
@@ -57,9 +63,10 @@ secrets:                                     # set as environment variables in t
 schedules:
   code_only:                                 # GitHub Actions cron, zero Claude usage
     - {id: ingest_morning, when: "weekdays 06:41 ET", job: "python -m harness.ingest"}
+    - {id: paper_fills,    when: "weekdays 09:47 ET", job: "python -m harness.paper_fill"}   # fills only tickets you approved
     - {id: monitor_close,  when: "weekdays 16:47 ET", job: "python -m harness.monitor --code-only"}
     - {id: ingest_evening, when: "weekdays 17:43 ET", job: "python -m harness.ingest"}
-    - {id: event_detector, when: "weekdays 17:53 ET", job: "python -m harness.events --alert"}   # emails you; you start an event run if needed
+    - {id: event_detector, when: "weekdays 17:53 ET", job: "python -m harness.events --alert"}   # opens a GitHub issue (GitHub emails you); you start an event run if needed
   claude_cloud:                              # Claude Code cloud scheduled tasks, each in its own 5-hour window
     - {id: research_a, when: "Sat 13:19 ET", agents: [liquidity, rates_credit, macro_cycle, valuation, volatility, us_equity]}
     - {id: research_b, when: "Sat 19:37 ET", agents: [geopolitics, supply_chain, energy, metals, intl_equity]}

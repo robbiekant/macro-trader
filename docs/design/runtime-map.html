@@ -1,0 +1,340 @@
+<title>Macro Trader Runtime Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: same briefing-book identity as the v2 blueprint. One reading column; a wide system map,
+   then tables that answer "where does it run, whose computer, who decides". Each place has its own hue. */
+:root {
+  --bg: #f2f5f3; --surface: #ffffff; --surface-2: #e8eeeb; --ink: #13211c; --muted: #586a63; --line: #d3ddd8;
+  --accent: #1e5d50; --accent-soft: #dcebe6;
+  --gha: #44596b; --gha-soft: #e1e8ee;
+  --cc: #1e5d50; --cc-soft: #dcebe6;
+  --sb: #2c5c8a; --sb-soft: #dde7f2;
+  --you: #9a6b1f; --you-soft: #f3e7d1;
+  --ext: #6f7b76; --ext-soft: #eceeed;
+  --bad: #b03a35;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1412; --surface: #141d1a; --surface-2: #1b2622; --ink: #e2ebe7; --muted: #95a8a0; --line: #263430;
+    --accent: #72b8a6; --accent-soft: #1d322c;
+    --gha: #9fb4c6; --gha-soft: #1d2730; --cc: #72b8a6; --cc-soft: #1d322c; --sb: #84abd9; --sb-soft: #1b2635;
+    --you: #d6a85a; --you-soft: #33291a; --ext: #a3aea9; --ext-soft: #20282a; --bad: #ec8077;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1412; --surface: #141d1a; --surface-2: #1b2622; --ink: #e2ebe7; --muted: #95a8a0; --line: #263430;
+  --accent: #72b8a6; --accent-soft: #1d322c;
+  --gha: #9fb4c6; --gha-soft: #1d2730; --cc: #72b8a6; --cc-soft: #1d322c; --sb: #84abd9; --sb-soft: #1b2635;
+  --you: #d6a85a; --you-soft: #33291a; --ext: #a3aea9; --ext-soft: #20282a; --bad: #ec8077;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15.5px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 36px 48px;
+}
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 0; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 4.4vw, 48px); line-height: 1.07; font-weight: 760; font-stretch: 108%; max-width: 20ch; }
+h2 { font-size: clamp(22px, 2.5vw, 28px); line-height: 1.15; font-weight: 720; font-stretch: 110%; }
+h3 { font-size: 16px; font-weight: 680; }
+p { margin: 0; max-width: 70ch; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 17px; color: var(--muted); }
+.small { font-size: 13.5px; color: var(--muted); }
+.mono { font-family: var(--font-mono); font-size: 0.88em; }
+section { display: grid; gap: 18px; padding-block: 40px 4px; }
+section + section { border-top: 1px solid var(--line); margin-top: 28px; }
+header.top { display: grid; gap: 16px; }
+
+/* quick answers */
+.qa { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.qa div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 4px; min-width: 0; }
+.qa .q { font-size: 13px; color: var(--muted); }
+.qa .a { font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 1.25; }
+.qa .d { font-size: 13.5px; color: var(--muted); }
+
+/* who chips */
+.who { display: inline-block; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.who.code, .who.gha { color: var(--gha); background: var(--gha-soft); }
+.who.claude, .who.cc { color: var(--cc); background: var(--cc-soft); }
+.who.sb { color: var(--sb); background: var(--sb-soft); }
+.who.you { color: var(--you); background: var(--you-soft); }
+.who.anth, .who.ext { color: var(--ext); background: var(--ext-soft); }
+
+/* diagram */
+.diagram { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.diagram svg { display: block; width: 100%; min-width: 820px; height: auto; }
+.bx { fill: var(--surface); stroke-width: 1.5; }
+.bx.ext { stroke: var(--ext); fill: var(--ext-soft); }
+.bx.gh { stroke: var(--ink); }
+.bx.gha { stroke: var(--gha); fill: var(--gha-soft); }
+.bx.cc { stroke: var(--cc); fill: var(--cc-soft); }
+.bx.sb { stroke: var(--sb); fill: var(--sb-soft); }
+.bx.you { stroke: var(--you); fill: var(--you-soft); }
+.t-title { font-family: var(--font-display); font-size: 17px; font-weight: 720; fill: var(--ink); }
+.t-sub { font-family: var(--font-mono); font-size: 11.5px; fill: var(--muted); }
+.t-li { font-family: var(--font-body); font-size: 13px; fill: var(--ink); }
+.t-lbl { font-family: var(--font-body); font-size: 12px; fill: var(--muted); }
+.t-strong { font-family: var(--font-body); font-size: 12.5px; font-weight: 600; fill: var(--bad); }
+.ln { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.ln.dash { stroke-dasharray: 6 5; stroke: var(--bad); }
+.ah { fill: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--muted); }
+
+/* tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; background: var(--surface-2); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.t { font-family: var(--font-mono); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td .who + .who { margin-left: 4px; }
+tr.grp td { background: var(--surface-2); font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding-block: 7px; }
+
+/* steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.steps li::before { content: counter(s, decimal-leading-zero); font-family: var(--font-mono); color: var(--accent); font-size: 13px; padding-top: 2px; }
+.steps li p { font-size: 14.5px; }
+.steps li .mono { color: var(--ink); }
+
+/* failure cards */
+.fails { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.fail { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.fail h3 { font-size: 15px; }
+.fail p { font-size: 14px; color: var(--muted); }
+footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+
+@media (max-width: 640px) {
+  .steps li { grid-template-columns: 30px 1fr; }
+  .steps li .who { grid-column: 2; justify-self: start; }
+}
+</style>
+
+<main class="wrap">
+<header class="top">
+  <span class="eyebrow">Macro Trader v2 · how it runs</span>
+  <h1>Two kinds of machines, one database, and you.</h1>
+  <p class="lede">The code lives in GitHub. GitHub's machines run the plain Python jobs every weekday. Anthropic's machines run the Claude agents on weekends, on your Pro plan. The two never call each other: they both read and write your Supabase database, and you make the final call on every trade.</p>
+  <div class="qa">
+    <div><span class="q">Where does the code live?</span><span class="a">GitHub repository</span><span class="d">Code, configs, agent prompts and risk rules. Rule changes need your approval on a PR.</span></div>
+    <div><span class="q">Where does the data live?</span><span class="a">Supabase</span><span class="d">Your database: market data, reports, tickets, approvals, positions and logs.</span></div>
+    <div><span class="q">Who runs downloads, checks and alerts?</span><span class="a">GitHub Actions</span><span class="d">GitHub's servers, weekdays, plain Python. No AI and no Claude usage.</span></div>
+    <div><span class="q">Where do the agents run?</span><span class="a">Claude Code cloud</span><span class="d">Anthropic's servers. All 19 agents run inside scheduled sessions on your Pro plan.</span></div>
+    <div><span class="q">Does an agent call a GitHub script?</span><span class="a">No</span><span class="d">Each place runs its own copy of the code from GitHub. They share work only through Supabase.</span></div>
+    <div><span class="q">Who decides to trade?</span><span class="a">You</span><span class="d">Claude proposes, code can veto, and nothing fills without your approval.</span></div>
+  </div>
+</header>
+
+<section id="map">
+  <div><span class="eyebrow">System map</span><h2>What talks to what</h2></div>
+  <div class="legend">
+    <span class="who gha">GitHub Actions · GitHub's computer</span>
+    <span class="who cc">Claude Code cloud · Anthropic's computer</span>
+    <span class="who sb">Supabase · Supabase's computer</span>
+    <span class="who you">You</span>
+    <span class="who ext">Outside services</span>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 1000 580" role="img" aria-labelledby="mapTitle mapDesc">
+      <title id="mapTitle">Macro Trader system map</title>
+      <desc id="mapDesc">GitHub stores the code. GitHub Actions downloads data and runs daily checks, writing to Supabase. Claude Code cloud clones the code, runs the agents, reads and writes Supabase, and sends you the weekly memo. You approve trades by replying. GitHub Actions and Claude Code never call each other.</desc>
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="ah"/></marker>
+      </defs>
+
+      <!-- top row -->
+      <rect class="bx ext" x="20" y="20" width="290" height="98" rx="10"/>
+      <text class="t-title" x="40" y="50">Data providers</text>
+      <text class="t-sub" x="40" y="70">their servers</text>
+      <text class="t-li" x="40" y="92">FRED · EIA · CFTC · Cboe · Shiller</text>
+      <text class="t-li" x="40" y="109">NY Fed · OECD · BIS · Massive</text>
+
+      <rect class="bx gh" x="355" y="20" width="290" height="98" rx="10"/>
+      <text class="t-title" x="375" y="50">GitHub repository</text>
+      <text class="t-sub" x="375" y="70">GitHub's storage</text>
+      <text class="t-li" x="375" y="92">Code · configs · agent prompts</text>
+      <text class="t-li" x="375" y="109">Risk rules: change only by your PR</text>
+
+      <rect class="bx ext" x="690" y="20" width="290" height="98" rx="10"/>
+      <text class="t-title" x="710" y="50">News &amp; official sites</text>
+      <text class="t-sub" x="710" y="70">their servers</text>
+      <text class="t-li" x="710" y="92">Central banks · OPEC · IEA · Reuters</text>
+      <text class="t-li" x="710" y="109">Read only by the 5 web desks</text>
+
+      <!-- middle row -->
+      <rect class="bx gha" x="20" y="190" width="300" height="190" rx="10"/>
+      <text class="t-title" x="40" y="222">GitHub Actions</text>
+      <text class="t-sub" x="40" y="242">GitHub's servers · plain Python · no AI</text>
+      <text class="t-li" x="40" y="270">• Download new data (Data Steward)</text>
+      <text class="t-li" x="40" y="292">• Mark positions, check risk limits</text>
+      <text class="t-li" x="40" y="314">• Fill approved tickets (paper)</text>
+      <text class="t-li" x="40" y="336">• Detect events, raise alerts</text>
+      <text class="t-sub" x="40" y="362">weekdays · a few minutes per job</text>
+
+      <rect class="bx cc" x="680" y="190" width="300" height="190" rx="10"/>
+      <text class="t-title" x="700" y="222">Claude Code cloud</text>
+      <text class="t-sub" x="700" y="242">Anthropic's servers · your Pro plan</text>
+      <text class="t-li" x="700" y="270">• Lead Claude runs the run's script</text>
+      <text class="t-li" x="700" y="292">• 19 agents run as sub-agents</text>
+      <text class="t-li" x="700" y="314">• Python checks between every step</text>
+      <text class="t-li" x="700" y="336">• Sat research · Sun committee</text>
+      <text class="t-sub" x="700" y="362">fresh container each run, then deleted</text>
+
+      <!-- bottom row -->
+      <rect class="bx sb" x="355" y="432" width="290" height="100" rx="10"/>
+      <text class="t-title" x="375" y="464">Supabase</text>
+      <text class="t-sub" x="375" y="484">Supabase's servers · your project</text>
+      <text class="t-li" x="375" y="506">Data · reports · tickets · approvals</text>
+      <text class="t-li" x="375" y="523">Positions · logs · the shared state</text>
+
+      <rect class="bx you" x="690" y="432" width="290" height="100" rx="10"/>
+      <text class="t-title" x="710" y="464">You</text>
+      <text class="t-sub" x="710" y="484">phone · email · claude.ai</text>
+      <text class="t-li" x="710" y="506">Approve or reject each ticket</text>
+      <text class="t-li" x="710" y="523">Approve rule changes on GitHub</text>
+
+      <!-- arrows -->
+      <path class="ln" d="M165 118 V186" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="175" y="158">new data only</text>
+
+      <path class="ln" d="M420 118 L304 188" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="378" y="166">copy of code</text>
+
+      <path class="ln" d="M580 118 L696 188" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="622" y="166" text-anchor="end">copy of code</text>
+
+      <path class="ln" d="M835 118 V186" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="845" y="158">web desks only</text>
+
+      <path class="ln dash" d="M324 285 H676"/>
+      <text class="t-strong" x="500" y="275" text-anchor="middle">never call each other</text>
+      <text class="t-lbl" x="500" y="304" text-anchor="middle">they meet only in Supabase</text>
+
+      <path class="ln" d="M250 382 L398 428" marker-start="url(#ah)" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="300" y="420" text-anchor="end">writes data, marks, fills</text>
+      <text class="t-lbl" x="300" y="436" text-anchor="end">reads approved tickets</text>
+
+      <path class="ln" d="M720 382 L602 428" marker-start="url(#ah)" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="626" y="394" text-anchor="end">reads data · writes reports, tickets</text>
+
+      <path class="ln" d="M910 382 V428" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="918" y="410">memo + push</text>
+
+      <path class="ln" d="M790 430 V384" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="782" y="410" text-anchor="end">your reply</text>
+
+      <path class="ln" d="M60 382 V556 H835 V536" marker-end="url(#ah)"/>
+      <text class="t-lbl" x="500" y="572" text-anchor="middle">alerts as GitHub issues (GitHub emails you)</text>
+    </svg>
+  </div>
+</section>
+
+<section id="compute">
+  <div><span class="eyebrow">Processing power</span><h2>Whose computer does what</h2></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Place</th><th>Whose computer</th><th>What runs there</th><th>AI?</th><th>Cost to you</th></tr></thead>
+      <tbody>
+        <tr><td><strong>GitHub repository</strong></td><td>GitHub</td><td>Stores code, configs, agent prompts, risk rules. Runs nothing.</td><td>No</td><td>Your existing repo</td></tr>
+        <tr><td><span class="who gha">GitHub Actions</span></td><td>GitHub's servers</td><td>Data Steward downloads, daily position marks and risk checks, paper fills, event alerts</td><td>No</td><td>A few hundred minutes a month; inside GitHub's free allowance for most accounts</td></tr>
+        <tr><td><span class="who cc">Claude Code cloud</span></td><td>Anthropic's servers: a container for the Python checks, plus the Claude model</td><td>Weekend research desks, Sunday committee, monthly review: all 19 agents</td><td>Yes</td><td>Your Pro plan allowance; no API key</td></tr>
+        <tr><td><span class="who sb">Supabase</span></td><td>Supabase's servers</td><td>Database and file storage. Stores; decides nothing.</td><td>No</td><td>Free tier to start; option chains stored filtered to stay small</td></tr>
+        <tr><td><span class="who ext">Data providers</span></td><td>Theirs</td><td>Serve data when the Data Steward asks</td><td>No</td><td>Free FRED and EIA keys; your Massive plan</td></tr>
+        <tr><td><span class="who you">You</span></td><td>Your phone or browser</td><td>Read the memo, approve or reject tickets, view the dashboard</td><td>You</td><td>Your time on Sunday</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="week">
+  <div><span class="eyebrow">Schedule (US Eastern)</span><h2>A week in the life</h2><p class="small">Weekdays belong to code on GitHub. The weekend belongs to Claude. You step in once, after the committee.</p></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>When</th><th>Where</th><th>What happens</th><th>Who decides</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="4">Every weekday</td></tr>
+        <tr><td class="t">06:41</td><td><span class="who gha">GitHub Actions</span></td><td>Download data released since the last run, nothing else</td><td><span class="who code">Code</span> release calendar + cache</td></tr>
+        <tr><td class="t">09:47</td><td><span class="who gha">GitHub Actions</span></td><td>Fill the tickets you approved (paper) at a limit price from a fresh option snapshot</td><td><span class="who code">Code</span> only approved tickets</td></tr>
+        <tr><td class="t">16:47</td><td><span class="who gha">GitHub Actions</span></td><td>Mark positions, check take-profit, 21-DTE, stop and delta triggers, check every risk limit</td><td><span class="who code">Code</span> rules in config</td></tr>
+        <tr><td class="t">17:43</td><td><span class="who gha">GitHub Actions</span></td><td>Evening data download</td><td><span class="who code">Code</span></td></tr>
+        <tr><td class="t">17:53</td><td><span class="who gha">GitHub Actions</span></td><td>Event detector: VIX jump, geopolitical spike, oil ±8%, surprise data. Opens a GitHub issue if something fires</td><td><span class="who code">Code</span> alerts · <span class="who you">You</span> start an event run or not</td></tr>
+        <tr class="grp"><td colspan="4">Weekend</td></tr>
+        <tr><td class="t">Sat 13:19</td><td><span class="who cc">Claude Code cloud</span></td><td>Research A: liquidity, rates and credit, growth and inflation, valuation, volatility, US equities</td><td><span class="who claude">Claude</span> conclusions · <span class="who code">Code</span> validates</td></tr>
+        <tr><td class="t">Sat 19:37</td><td><span class="who cc">Claude Code cloud</span></td><td>Research B: geopolitics, supply chain, energy, metals, international equities</td><td><span class="who claude">Claude</span> conclusions · <span class="who code">Code</span> validates</td></tr>
+        <tr><td class="t">Sun 14:41</td><td><span class="who cc">Claude Code cloud</span></td><td>Committee: regime, CIO plan, red team, trade selection, risk check, memo. Push notification to your phone</td><td><span class="who claude">Claude</span> proposes · <span class="who code">Code</span> can veto</td></tr>
+        <tr><td class="t">Sun evening</td><td><span class="who you">You</span></td><td>Reply in the committee session: approve, change or reject each ticket. Your reply is saved in Supabase</td><td><span class="who you">You</span></td></tr>
+        <tr><td class="t">Mon 09:47</td><td><span class="who gha">GitHub Actions</span></td><td>Paper fills for what you approved</td><td><span class="who code">Code</span></td></tr>
+        <tr class="grp"><td colspan="4">Monthly</td></tr>
+        <tr><td class="t">1st, 20:11</td><td><span class="who cc">Claude Code cloud</span></td><td>Performance review, forecast scoring, post-mortems, proposed lessons, harness cleanup</td><td><span class="who claude">Claude</span> proposes · <span class="who you">You</span> accept lessons</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="inside">
+  <div><span class="eyebrow">Zoom in</span><h2>Inside one Claude Code cloud run</h2><p class="small">Saturday's Research A, step by step. The lead Claude conducts, but code decides which step is allowed next.</p></div>
+  <ol class="steps">
+    <li><p>The scheduled task fires. Anthropic starts a fresh container, copies the code from GitHub, and loads your keys and network allow-list.</p><span class="who anth">Anthropic</span></li>
+    <li><p>The lead Claude opens the run's script (<span class="mono">/research-a</span>). It conducts the run but doesn't choose the order.</p><span class="who claude">Claude</span></li>
+    <li><p><span class="mono">harness preflight</span> checks that the kill switch is off, no API key is set, and critical data is fresh. If not, the run stops.</p><span class="who code">Code</span></li>
+    <li><p><span class="mono">harness packs</span> builds each desk's briefing pack from Supabase: summary tables, last week's report, accepted lessons.</p><span class="who code">Code</span></li>
+    <li><p>The six desks run as sub-agents. Each reads its pack and queries Supabase through read-only tools, then writes its report.</p><span class="who claude">Claude</span></li>
+    <li><p><span class="mono">harness submit</span> checks the format, checks every cited number against Supabase, and checks freshness. Failures go back with a fix list, at most twice.</p><span class="who code">Code</span></li>
+    <li><p><span class="mono">harness next</span> unlocks the next step only when the previous one is stored, so steps can't be skipped.</p><span class="who code">Code</span></li>
+    <li><p>Reports, usage and logs are saved in Supabase. The container is deleted when the session ends.</p><span class="who sb">Supabase</span></li>
+  </ol>
+</section>
+
+<section id="decide">
+  <div><span class="eyebrow">Authority</span><h2>Who decides at each step</h2></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Step</th><th>Proposes</th><th>Checks</th><th>Final say</th></tr></thead>
+      <tbody>
+        <tr><td>Which data to download</td><td><span class="who code">Code</span> release calendar + cache</td><td>–</td><td><span class="who code">Code</span></td></tr>
+        <tr><td>What the data means</td><td><span class="who claude">Claude</span> research desks</td><td><span class="who code">Code</span> format, citations, freshness</td><td><span class="who claude">Claude</span>, within the checks</td></tr>
+        <tr><td>Regime probabilities</td><td><span class="who code">Code</span> model</td><td><span class="who claude">Claude</span> may shift each by ±15 pts with evidence</td><td><span class="who code">Code</span>-bounded Claude</td></tr>
+        <tr><td>Direction and size per sleeve</td><td><span class="who claude">Claude</span> CIO</td><td><span class="who claude">Claude</span> red team · <span class="who code">Code</span> limits</td><td><span class="who claude">Claude</span> CIO, inside limits</td></tr>
+        <tr><td>Exact trades</td><td><span class="who code">Code</span> builds candidates from live chains</td><td><span class="who claude">Claude</span> structurer picks</td><td><span class="who code">Code</span> risk engine</td></tr>
+        <tr><td>Is the trade allowed?</td><td>–</td><td><span class="who code">Code</span> policy + 9 stress tests</td><td><span class="who code">Code</span>; a block is final</td></tr>
+        <tr><td>Does the trade happen?</td><td><span class="who claude">Claude</span> committee memo</td><td>–</td><td><span class="who you">You</span></td></tr>
+        <tr><td>Paper fill</td><td>–</td><td><span class="who code">Code</span> fills only approved tickets</td><td><span class="who code">Code</span></td></tr>
+        <tr><td>Close or roll a position</td><td><span class="who code">Code</span> triggers · <span class="who claude">Claude</span> drafts at the next committee or an event run</td><td><span class="who code">Code</span> risk check</td><td><span class="who you">You</span></td></tr>
+        <tr><td>Start an event run</td><td><span class="who code">Code</span> detector alerts you</td><td>–</td><td><span class="who you">You</span></td></tr>
+        <tr><td>Change a risk limit</td><td>Anyone, by pull request</td><td>–</td><td><span class="who you">You</span> merge it or not</td></tr>
+        <tr><td>Lessons learned</td><td><span class="who claude">Claude</span> performance agent</td><td>–</td><td><span class="who you">You</span></td></tr>
+        <tr><td>Emergency stop</td><td><span class="who code">Code</span> circuit breakers</td><td>–</td><td><span class="who code">Code</span> or <span class="who you">You</span> (kill switch)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="failures">
+  <div><span class="eyebrow">Resilience</span><h2>When something breaks</h2><p class="small">Because the daily safety work runs on GitHub without Claude, losing Claude never stops risk monitoring.</p></div>
+  <div class="fails">
+    <div class="fail"><h3>Your Pro limit runs out mid-run</h3><p>The run stops after its last saved step. It resumes after the reset, from that step. Daily marks, risk checks and alerts keep running on GitHub.</p></div>
+    <div class="fail"><h3>Claude is unavailable</h3><p>No new trades are proposed that week. Open positions are still marked and checked by code, and alerts still reach you.</p></div>
+    <div class="fail"><h3>A GitHub job fails</h3><p>GitHub emails you. The next run catches up, because the Data Steward downloads only what is missing.</p></div>
+    <div class="fail"><h3>Supabase is down</h3><p>Both runners stop at preflight. Nothing trades without the database.</p></div>
+    <div class="fail"><h3>A data source is down</h3><p>That series goes stale. If it is a critical series, the system drops to research-only mode until it is fresh again.</p></div>
+    <div class="fail"><h3>An agent writes a bad report</h3><p>Code rejects it with a fix list. After two failures, last week's report is reused and flagged stale.</p></div>
+  </div>
+</section>
+
+<footer>
+  <p class="small">Full design: <a href="https://claude.ai/artifact/WJmJYJ3ckaZ8uLrySGWhuR">Macro Trader v2 Blueprint</a> · settings in <span class="mono">config/runtime.yaml</span> · nothing here runs yet; this is the plan for Phase 1 onward.</p>
+</footer>
+</main>

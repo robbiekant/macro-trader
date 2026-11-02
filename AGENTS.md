@@ -16,6 +16,7 @@ Macro Trader v2: a harness of Claude agents that research global macro (liquidit
 | How the harness works | [docs/design/HARNESS.md](docs/design/HARNESS.md) |
 | Decisions waiting on the owner | [docs/design/OPEN_QUESTIONS.md](docs/design/OPEN_QUESTIONS.md) |
 | Visual blueprint / dashboard of the plan | [docs/design/blueprint.html](docs/design/blueprint.html) |
+| Where each part runs, whose computer, who decides | [docs/design/runtime-map.html](docs/design/runtime-map.html) |
 | Agent registry (missions, tools, effort, outputs) | [config/agents.yaml](config/agents.yaml) |
 | Runtime: Claude Code cloud on the Pro plan, schedules, secrets, network allow-list | [config/runtime.yaml](config/runtime.yaml) |
 | Hard risk limits | [config/risk_policy.yaml](config/risk_policy.yaml) |
