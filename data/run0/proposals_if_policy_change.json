@@ -1,0 +1,367 @@
+{
+ "as_of": "2026-11-02",
+ "nav": 1000000,
+ "hurdle_ffr": 3.88,
+ "tickets": [
+  {
+   "id": "T1",
+   "sleeve": "energy",
+   "instrument": "USO",
+   "structure": "put_credit_spread",
+   "entry_on_or_after": "2026-11-04",
+   "expiry": "2026-12-18",
+   "dte_at_entry": 44,
+   "spot_ref": 168.83,
+   "iv_used": 57.2,
+   "iv_source": "fred:OVXCLS (OVX is USO's 30-day implied vol)",
+   "short_delta_target": 0.1,
+   "width": 5,
+   "legs": [
+    {
+     "put_call": "P",
+     "side": "sell",
+     "strike": 134.0,
+     "delta": -0.099
+    },
+    {
+     "put_call": "P",
+     "side": "buy",
+     "strike": 129.0
+    }
+   ],
+   "quantity": 26,
+   "credit_per_unit": 0.51,
+   "credit_pct_width": 10.2,
+   "credit_total": 1328,
+   "max_loss_total": 11672,
+   "bpr_est": 11672,
+   "delta_dollars": 11605,
+   "return_on_risk_pct": 11.4,
+   "conviction": 0.55,
+   "pricing": "MODEL ESTIMATE - re-price on a live chain before approval"
+  },
+  {
+   "id": "T2",
+   "sleeve": "us_equity_index",
+   "instrument": "XSP",
+   "structure": "iron_condor",
+   "entry_on_or_after": "2026-11-04",
+   "expiry": "2026-12-18",
+   "dte_at_entry": 44,
+   "spot_ref": 755.72,
+   "iv_used": 17.2,
+   "iv_source": "fred:VIXCLS (SPY close used as XSP price proxy)",
+   "short_delta_target": 0.08,
+   "width": 10,
+   "legs": [
+    {
+     "put_call": "P",
+     "side": "sell",
+     "strike": 689.0,
+     "delta": -0.078
+    },
+    {
+     "put_call": "P",
+     "side": "buy",
+     "strike": 679.0
+    },
+    {
+     "put_call": "C",
+     "side": "sell",
+     "strike": 822.0,
+     "delta": 0.076
+    },
+    {
+     "put_call": "C",
+     "side": "buy",
+     "strike": 832.0
+    }
+   ],
+   "quantity": 16,
+   "credit_per_unit": 1.12,
+   "credit_pct_width": 11.2,
+   "credit_total": 1789,
+   "max_loss_total": 14211,
+   "bpr_est": 14211,
+   "delta_dollars": -17806,
+   "return_on_risk_pct": 12.6,
+   "conviction": 0.5,
+   "pricing": "MODEL ESTIMATE - re-price on a live chain before approval"
+  },
+  {
+   "id": "T3",
+   "sleeve": "intl_equity",
+   "instrument": "EEM",
+   "structure": "iron_condor",
+   "entry_on_or_after": "2026-11-04",
+   "expiry": "2026-12-18",
+   "dte_at_entry": 44,
+   "spot_ref": 61.04,
+   "iv_used": 29.3,
+   "iv_source": "fred:VXEEMCLS (EEM 30-day implied vol)",
+   "short_delta_target": 0.08,
+   "width": 2,
+   "legs": [
+    {
+     "put_call": "P",
+     "side": "sell",
+     "strike": 52.5,
+     "delta": -0.075
+    },
+    {
+     "put_call": "P",
+     "side": "buy",
+     "strike": 50.5
+    },
+    {
+     "put_call": "C",
+     "side": "sell",
+     "strike": 71.0,
+     "delta": 0.071
+    },
+    {
+     "put_call": "C",
+     "side": "buy",
+     "strike": 73.0
+    }
+   ],
+   "quantity": 44,
+   "credit_per_unit": 0.21,
+   "credit_pct_width": 10.6,
+   "credit_total": 936,
+   "max_loss_total": 7864,
+   "bpr_est": 7864,
+   "delta_dollars": -176,
+   "return_on_risk_pct": 11.9,
+   "conviction": 0.45,
+   "pricing": "MODEL ESTIMATE - re-price on a live chain before approval"
+  },
+  {
+   "id": "T4",
+   "sleeve": "rates",
+   "instrument": "TLT",
+   "structure": "call_credit_spread",
+   "entry_on_or_after": "2026-11-04",
+   "expiry": "2026-12-18",
+   "dte_at_entry": 44,
+   "spot_ref": 81.84,
+   "iv_used": 12.2,
+   "iv_source": "estimate: 1.15 x TLT 20-day realized vol (no TLT vol index stored)",
+   "short_delta_target": 0.2,
+   "width": 2,
+   "legs": [
+    {
+     "put_call": "C",
+     "side": "sell",
+     "strike": 85.5,
+     "delta": 0.184
+    },
+    {
+     "put_call": "C",
+     "side": "buy",
+     "strike": 87.5
+    }
+   ],
+   "quantity": 34,
+   "credit_per_unit": 0.25,
+   "credit_pct_width": 12.3,
+   "credit_total": 839,
+   "max_loss_total": 5961,
+   "bpr_est": 5961,
+   "delta_dollars": -32907,
+   "return_on_risk_pct": 14.1,
+   "conviction": 0.6,
+   "pricing": "MODEL ESTIMATE - re-price on a live chain before approval"
+  }
+ ],
+ "stand_aside": [],
+ "policy_checks": [
+  {
+   "rule_id": "max_loss_per_defined_risk_position_pct_nav",
+   "ticket": "T1",
+   "passed": true,
+   "observed": 11672,
+   "limit": 20000.0,
+   "severity": "info",
+   "message": "T1 max loss $11,672"
+  },
+  {
+   "rule_id": "naked_short_calls",
+   "ticket": "T1",
+   "passed": true,
+   "observed": 0,
+   "limit": 0,
+   "severity": "info",
+   "message": "T1 has no naked calls (all calls are spread-protected)"
+  },
+  {
+   "rule_id": "min_credit_pct_of_width",
+   "ticket": "T1",
+   "passed": true,
+   "observed": 10.2,
+   "limit": 10.0,
+   "severity": "info",
+   "message": "T1 collects 10.2% of width at 0.1 delta"
+  },
+  {
+   "rule_id": "max_loss_per_defined_risk_position_pct_nav",
+   "ticket": "T2",
+   "passed": true,
+   "observed": 14211,
+   "limit": 20000.0,
+   "severity": "info",
+   "message": "T2 max loss $14,211"
+  },
+  {
+   "rule_id": "naked_short_calls",
+   "ticket": "T2",
+   "passed": true,
+   "observed": 0,
+   "limit": 0,
+   "severity": "info",
+   "message": "T2 has no naked calls (all calls are spread-protected)"
+  },
+  {
+   "rule_id": "min_credit_pct_of_width",
+   "ticket": "T2",
+   "passed": true,
+   "observed": 11.2,
+   "limit": 10.0,
+   "severity": "info",
+   "message": "T2 collects 11.2% of width at 0.08 delta"
+  },
+  {
+   "rule_id": "max_loss_per_defined_risk_position_pct_nav",
+   "ticket": "T3",
+   "passed": true,
+   "observed": 7864,
+   "limit": 20000.0,
+   "severity": "info",
+   "message": "T3 max loss $7,864"
+  },
+  {
+   "rule_id": "naked_short_calls",
+   "ticket": "T3",
+   "passed": true,
+   "observed": 0,
+   "limit": 0,
+   "severity": "info",
+   "message": "T3 has no naked calls (all calls are spread-protected)"
+  },
+  {
+   "rule_id": "min_credit_pct_of_width",
+   "ticket": "T3",
+   "passed": true,
+   "observed": 10.6,
+   "limit": 10.0,
+   "severity": "info",
+   "message": "T3 collects 10.6% of width at 0.08 delta"
+  },
+  {
+   "rule_id": "max_loss_per_defined_risk_position_pct_nav",
+   "ticket": "T4",
+   "passed": true,
+   "observed": 5961,
+   "limit": 20000.0,
+   "severity": "info",
+   "message": "T4 max loss $5,961"
+  },
+  {
+   "rule_id": "naked_short_calls",
+   "ticket": "T4",
+   "passed": true,
+   "observed": 0,
+   "limit": 0,
+   "severity": "info",
+   "message": "T4 has no naked calls (all calls are spread-protected)"
+  },
+  {
+   "rule_id": "min_credit_pct_of_width",
+   "ticket": "T4",
+   "passed": true,
+   "observed": 12.3,
+   "limit": 10.0,
+   "severity": "info",
+   "message": "T4 collects 12.3% of width at 0.2 delta"
+  },
+  {
+   "rule_id": "bpr_utilization_hard_max",
+   "ticket": null,
+   "passed": true,
+   "observed": 39708,
+   "limit": 500000.0,
+   "severity": "info",
+   "message": "total buying power $39,708 (4.0% of NAV)"
+  },
+  {
+   "rule_id": "bpr_utilization_target_range",
+   "ticket": null,
+   "passed": false,
+   "observed": 39708,
+   "limit": "25-40% NAV",
+   "severity": "warn",
+   "message": "below target range: with defined-risk spreads the stress budget binds first (design note)"
+  },
+  {
+   "rule_id": "net_beta_weighted_delta_pct_nav",
+   "ticket": null,
+   "passed": true,
+   "observed": -39284,
+   "limit": "-30%..+60% NAV",
+   "severity": "info",
+   "message": "net $delta about $-39,284 (not beta-weighted in Run 0)"
+  },
+  {
+   "rule_id": "stress_equity_crash_20",
+   "ticket": null,
+   "passed": true,
+   "observed": 39708,
+   "limit": 120000.0,
+   "severity": "info",
+   "message": "worst case if every ticket hits max loss together: $39,708 (4.0% of NAV)"
+  },
+  {
+   "rule_id": "event_blackout_ELECTION",
+   "ticket": null,
+   "passed": false,
+   "observed": "2026-11-03 US midterm elections",
+   "limit": "72h before: no new short-vol risk, all sleeves",
+   "severity": "block",
+   "message": "entries are blocked until 2026-11-04 09:45 ET; tickets are staged for that date"
+  },
+  {
+   "rule_id": "event_blackout_NFP",
+   "ticket": null,
+   "passed": true,
+   "observed": "2026-11-06 October payrolls",
+   "limit": "12h before: us_equity_index, rates",
+   "severity": "info",
+   "message": "enter XSP and TLT on Nov 4 or 5, or wait until after the release"
+  },
+  {
+   "rule_id": "vix_35_breaker",
+   "ticket": null,
+   "passed": true,
+   "observed": 17.2,
+   "limit": 35,
+   "severity": "info",
+   "message": "VIX below 35: naked puts would be allowed (none proposed)"
+  },
+  {
+   "rule_id": "data_option_chains",
+   "ticket": null,
+   "passed": false,
+   "observed": "plan not entitled (HTTP 403)",
+   "limit": "live chain required",
+   "severity": "warn",
+   "message": "all strikes and credits are model estimates"
+  }
+ ],
+ "totals": {
+  "credit": 4892,
+  "max_loss": 39708,
+  "bpr": 39708,
+  "delta_dollars": -39284
+ },
+ "min_credit_pct_of_width": 0.1
+}

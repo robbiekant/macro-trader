@@ -1,0 +1,92 @@
+[
+ {
+  "agent_id": "liquidity",
+  "passed": true,
+  "citations_checked": 9,
+  "errors": []
+ },
+ {
+  "agent_id": "rates_credit",
+  "passed": true,
+  "citations_checked": 10,
+  "errors": []
+ },
+ {
+  "agent_id": "macro_cycle",
+  "passed": true,
+  "citations_checked": 10,
+  "errors": []
+ },
+ {
+  "agent_id": "geopolitics",
+  "passed": true,
+  "citations_checked": 6,
+  "errors": []
+ },
+ {
+  "agent_id": "supply_chain",
+  "passed": true,
+  "citations_checked": 5,
+  "errors": []
+ },
+ {
+  "agent_id": "energy",
+  "passed": true,
+  "citations_checked": 13,
+  "errors": []
+ },
+ {
+  "agent_id": "metals",
+  "passed": true,
+  "citations_checked": 12,
+  "errors": []
+ },
+ {
+  "agent_id": "us_equity",
+  "passed": true,
+  "citations_checked": 9,
+  "errors": []
+ },
+ {
+  "agent_id": "intl_equity",
+  "passed": true,
+  "citations_checked": 9,
+  "errors": []
+ },
+ {
+  "agent_id": "valuation",
+  "passed": true,
+  "citations_checked": 8,
+  "errors": []
+ },
+ {
+  "agent_id": "volatility",
+  "passed": true,
+  "citations_checked": 9,
+  "errors": []
+ },
+ {
+  "agent_id": "regime",
+  "passed": true,
+  "citations_checked": 1,
+  "errors": []
+ },
+ {
+  "agent_id": "regime",
+  "passed": true,
+  "citations_checked": 1,
+  "errors": []
+ },
+ {
+  "agent_id": "regime",
+  "passed": true,
+  "citations_checked": 1,
+  "errors": []
+ },
+ {
+  "agent_id": "regime",
+  "passed": true,
+  "citations_checked": 1,
+  "errors": []
+ }
+]
