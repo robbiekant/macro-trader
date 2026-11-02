@@ -117,6 +117,21 @@ Budgets per step (tool calls, dollars, wall-clock) are enforced by the runner. A
 
 ---
 
+## Runtime: the harness inside Claude Code
+
+The harness runs in Claude Code cloud sessions on your Pro plan (`config/runtime.yaml`). Claude Code supplies the agent loop; this repository supplies everything else.
+
+| Harness subsystem | How it is realized in Claude Code |
+|---|---|
+| Instructions & context | `AGENTS.md` (loaded via `CLAUDE.md`), one `.claude/agents/<id>.md` sub-agent per agent, context pack passed in the step prompt |
+| Tools | A local MCP server (`harness/mcp/`) exposes only read-only database tools and `submit_report`; `--allowedTools` limits each step to them (plus web tools for the five web desks); scheduled tasks attach no claude.ai connectors |
+| Typed output | `--json-schema contracts/<contract>.schema.json`; `submit_report` re-validates schema and citations against the database and returns remediation text on failure |
+| Orchestration | Python DAG runs one `claude -p` per agent step, so code, not the model, decides what runs next |
+| Guardrails | `--permission-mode dontAsk` and `--permission-prompts none` deny anything not allow-listed; hooks log every tool call to `ops.tool_call`; risk limits and the paper broker are plain code no agent can call |
+| Observability | `--output-format json` returns session ID, usage and an API-equivalent cost estimate per step, stored in `ops.agent_step` |
+| State | Supabase Postgres; the cloud container is disposable |
+| Budget | Weekly work split into three sessions in separate five-hour windows; checkpoints let a run resume after a usage-limit reset |
+
 ## Golden rules
 
 1. Models judge; code computes, controls the flow and enforces limits.

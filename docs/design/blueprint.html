@@ -342,7 +342,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line);
     <div class="tile"><span class="k">Buying power used</span><span class="v">25–40%</span><span class="s">hard cap 50% of NAV</span></div>
     <div class="tile"><span class="k">Trades without your approval</span><span class="v">0</span><span class="s">paper mode by default</span></div>
   </div>
-  <p class="callout"><strong>What I need from you:</strong> approve or change this design and answer the 13 decisions at the <a href="#questions">end of this page</a>. Defaults are listed for each, so "defaults are fine" is a valid answer.</p>
+  <p class="callout"><strong>What I need from you:</strong> approve or change this design and answer the 11 open decisions at the <a href="#questions">end of this page</a> (runtime and model budget are decided: Claude Code cloud on your Pro plan, no API charges). Defaults are listed for each, so "defaults are fine" is a valid answer.</p>
 </div>
 
 <!-- ================= ENGINE ================= -->
@@ -509,18 +509,20 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line);
     <div class="step"><h3>Red team</h3><p class="small">A separate agent tries to break the plan; the CIO answers each challenge.</p><div class="tags"><span class="tag i">adversarial review</span></div></div>
     <div class="step"><h3>Structure</h3><p class="small">Code generates candidate trades from live chains; the structurer picks and sizes.</p><div class="tags"><span class="tag c">candidate IDs only</span><span class="tag c">liquidity filters</span></div></div>
     <div class="step"><h3>Risk gate</h3><p class="small">Policy limits and 9 stress scenarios on the post-trade book.</p><div class="tags"><span class="tag c">block is final</span><span class="tag i">risk memo on warnings</span></div></div>
-    <div class="step"><h3>Your approval</h3><p class="small">Approve, modify or reject each ticket on the committee page, Monday before the open.</p><div class="tags"><span class="tag h">nothing executes without it</span></div></div>
+    <div class="step"><h3>Your approval</h3><p class="small">A push notification arrives; reply in the committee session to approve, modify or reject each ticket.</p><div class="tags"><span class="tag h">nothing executes without it</span></div></div>
     <div class="step"><h3>Execute</h3><p class="small">Paper by default; limit orders 09:45–15:45 ET; fills reconciled.</p><div class="tags"><span class="tag c">idempotency keys</span></div></div>
     <div class="step"><h3>Record &amp; learn</h3><p class="small">Run report, costs, lineage; every view queued for scoring on its resolve date.</p><div class="tags"><span class="tag c">traces</span><span class="tag i">post-mortems monthly</span></div></div>
   </div>
   <div class="scroll-x">
     <table>
-      <thead><tr><th>Run</th><th>When (ET, proposed)</th><th>What happens</th></tr></thead>
+      <thead><tr><th>Run · where</th><th>When (ET)</th><th>What happens</th></tr></thead>
       <tbody>
-        <tr><td><strong>Daily</strong></td><td class="num">06:30 ingest · 16:30 monitor</td><td>Due series, vol metrics, position marks, management triggers, liquidity and vol refresh, risk check, alerts</td></tr>
-        <tr><td><strong>Weekly IC</strong></td><td class="num">Sun 18:00 · approvals Mon pre-open</td><td>The full cycle above</td></tr>
-        <tr><td><strong>Event</strong></td><td>On trigger</td><td>VIX +25% in a day, geopolitical risk above its 95th percentile, crude ±8%, FOMC or CPI surprise → affected desks, risk and monitor</td></tr>
-        <tr><td><strong>Monthly</strong></td><td>First weekend</td><td>CAPE refresh, attribution, calibration scoring, post-mortems, proposed lessons</td></tr>
+        <tr><td><strong>Daily</strong> · GitHub Actions, no Claude usage</td><td class="num">Weekdays 06:41 · 16:47 · 17:43</td><td>Due series, vol metrics, position marks, management triggers, risk check</td></tr>
+        <tr><td><strong>Event detector</strong> · GitHub Actions</td><td class="num">Weekdays 17:53</td><td>VIX +25% in a day, geopolitical-risk spike, crude ±8%, FOMC or CPI surprise → emails you; you start an event run if you want one</td></tr>
+        <tr><td><strong>Research A</strong> · Claude Code cloud</td><td class="num">Sat 13:19</td><td>Liquidity, rates &amp; credit, growth &amp; inflation, valuation, volatility, US equities</td></tr>
+        <tr><td><strong>Research B</strong> · Claude Code cloud</td><td class="num">Sat 19:37</td><td>Geopolitics, supply chain, energy, metals, international equities</td></tr>
+        <tr><td><strong>Committee</strong> · Claude Code cloud</td><td class="num">Sun 14:41</td><td>Regime, CIO and red team, structurer, risk memo; push notification, you approve by replying; paper fills Monday</td></tr>
+        <tr><td><strong>Monthly</strong> · Claude Code cloud</td><td class="num">1st of month 20:11</td><td>Attribution, calibration scoring, post-mortems, proposed lessons, janitor</td></tr>
       </tbody>
     </table>
   </div>
@@ -614,7 +616,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line);
       <span class="src">Global CAPE provider <i class="paid">paid · TBD</i></span>
       <span class="src">Web search, allow-listed domains <i class="paid">per use</i></span>
     </div>
-    <p class="small">Massive and Interactive Brokers connectors are already attached to your Claude account; the app itself will use their APIs with keys you provide.</p>
+    <p class="small">Agent runs attach no claude.ai connectors. The Data Steward calls each source with keys stored as cloud environment variables. Interactive Brokers waits for the live phase; paper fills are simulated from stored option chains.</p>
   </div>
 </section>
 
@@ -774,7 +776,7 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line);
   <div class="sec-head">
     <span class="eyebrow">09 · What you will use</span>
     <h2>Dashboard preview: Command Center</h2>
-    <p>The live app (rebuilt from the existing React front end) has seven pages: Command Center, Regime &amp; Macro, Research Desk, Investment Committee, Positions &amp; Risk, Lineage, and Harness Ops. This mock shows the first one.</p>
+    <p>The dashboard (published as a Claude artifact after each run; the React app is optional) has seven pages: Command Center, Regime &amp; Macro, Research Desk, Investment Committee, Positions &amp; Risk, Lineage, and Harness Ops. This mock shows the first one.</p>
   </div>
   <div class="mock">
     <span class="mock-flag">Illustrative sample · not market data · not your account</span>
@@ -853,12 +855,12 @@ footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line);
     <div class="qrow"><span class="qn">Q7</span><span>Taxable account? Prefer Section 1256 products (XSP/SPX, futures options)?</span><span class="qd"><b>Default</b>Yes; XSP/SPX for the US sleeve</span></div>
     <div class="qgroup">Data and cost</div>
     <div class="qrow"><span class="qn">Q8</span><span>Your Massive plan (does it include options)? Pay for a global CAPE source or use a computed proxy?</span><span class="qd"><b>Default</b>Free sources + your Massive plan; computed proxy for global CAPE</span></div>
-    <div class="qrow"><span class="qn">Q9</span><span>Opus 5.5 for every agent, or a cheaper model for bulk news triage? Monthly model budget?</span><span class="qd"><b>Default</b>Opus 5.5 everywhere; $300/month cap with an 80% alert</span></div>
+    <div class="qrow"><span class="qn">Q9</span><span>Model and budget</span><span class="qd"><b>Decided</b>Claude Code on your Pro plan, no API charges; Opus 5.5 with Pro-budget effort, fallbacks if limits bite</span></div>
     <div class="qgroup">Operations</div>
     <div class="qrow"><span class="qn">Q10</span><span>Should take-profit closes ever execute automatically once live is proven?</span><span class="qd"><b>Default</b>No; revisit after 3 months live</span></div>
     <div class="qrow"><span class="qn">Q11</span><span>Weekly IC Sunday evening plus daily checks? Time zone? Email, Slack or push?</span><span class="qd"><b>Default</b>As proposed, US Eastern, email summary + push for breakers</span></div>
     <div class="qrow"><span class="qn">Q12</span><span>Inject your own discretionary views for the committee to address?</span><span class="qd"><b>Default</b>Yes, optional, never bypassing limits</span></div>
-    <div class="qrow"><span class="qn">Q13</span><span>Keep React + Supabase and add a Python harness? Where should it run?</span><span class="qd"><b>Default</b>Yes; one small cloud VM with Docker Compose</span></div>
+    <div class="qrow"><span class="qn">Q13</span><span>Stack and hosting</span><span class="qd"><b>Decided</b>Claude Code cloud + scheduled tasks, GitHub Actions for code-only jobs, your Supabase database</span></div>
   </div>
 </section>
 

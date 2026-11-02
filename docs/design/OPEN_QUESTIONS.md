@@ -30,8 +30,7 @@ Answer inline, or just reply "defaults are fine" for any you agree with. Each qu
 **Q8. Data budget.** Which Massive (Polygon) plan do you have, and does it include options data? Willing to pay for a global CAPE source (Research Affiliates, Barclays, Siblis), or use a computed proxy?
 *Default:* Free public sources + your Massive plan; global CAPE from a computed proxy until you choose a provider. US CAPE (Shiller) is free.
 
-**Q9. Model and monthly budget.** All agents on Claude Opus 5.5 with effort tuned per agent, or allow a cheaper model (Claude Haiku 5.5) for bulk news triage? Monthly cap for model usage?
-*Default:* Opus 5.5 everywhere, $300/month cap, alerts at 80%.
+**Q9. Model and monthly budget.** **Decided 2026-11-02:** Run in Claude Code on your Claude Pro plan: no API charges. Claude Opus 5.5 with Pro-budget effort; if the weekly allowance does not fit, the fallbacks in `config/runtime.yaml` apply in your chosen order.
 
 ## Operations
 
@@ -44,5 +43,4 @@ Answer inline, or just reply "defaults are fine" for any you agree with. Each qu
 **Q12. Your own views.** Do you want to inject discretionary views ("PM view") that the committee must address? They would never bypass risk limits.
 *Default:* Yes, as an optional input on the IC page.
 
-**Q13. Stack and hosting.** Keep the React + Supabase app and add a Python harness, or go all-Python? Where should it run (your machine, a cloud VM)?
-*Default:* Keep React + Supabase, add the Python harness, run on one small cloud VM with Docker Compose.
+**Q13. Stack and hosting.** **Decided 2026-11-02:** Claude Code cloud sessions and scheduled tasks for agent runs, GitHub Actions for code-only jobs, your Supabase project for the database. Details in `config/runtime.yaml`.

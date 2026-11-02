@@ -126,12 +126,18 @@ Beyond what you listed, I added **rates/central banks/credit** (your "interest r
 
 ## 6. Run cadence
 
-| Run | When (ET, proposed) | What happens |
-|---|---|---|
-| **Weekly IC** | Sunday 18:00, approvals Monday before the open | Full pipeline: ingest → 11 research agents → regime → CIO ↔ red team → structurer → risk → your approval → paper/live orders Monday 09:45–15:45 |
-| **Daily** | 06:30 ingest; 16:30 monitor | Ingest due series, recompute vol metrics, mark positions, fire management triggers, refresh liquidity/vol views, risk check, alerts |
-| **Event** | On trigger | VIX +25% in a day, GPR spike above 95th pct, crude ±8%, FOMC/CPI surprise → a mini-run of the affected desks + risk + monitor |
-| **Monthly** | First weekend | CAPE refresh, full attribution, calibration scoring, post-mortems, lessons for your review |
+Decided 2026-11-02: everything runs in **Claude Code cloud sessions on your Claude Pro plan**, with code-only jobs on GitHub Actions so they use none of the plan's allowance. Full settings: [`config/runtime.yaml`](../../config/runtime.yaml).
+
+| Run | Where | When (ET) | What happens |
+|---|---|---|---|
+| **Daily ingest + monitor** | GitHub Actions (code only, no Claude usage) | Weekdays 06:41, 16:47, 17:43 | Due series, vol metrics, position marks, management triggers, risk check |
+| **Event detector** | GitHub Actions | Weekdays 17:53 | Flags VIX +25%, geopolitical-risk spike, crude ±8%, FOMC/CPI surprise; emails you, and you start an event run if you want one |
+| **Research A** | Claude Code cloud scheduled task | Sat 13:19 | Liquidity, rates & credit, growth & inflation, valuation, volatility, US equities |
+| **Research B** | Claude Code cloud scheduled task | Sat 19:37 | Geopolitics, supply chain, energy, metals, international equities |
+| **Committee** | Claude Code cloud scheduled task | Sun 14:41 | Regime → CIO ↔ red team → structurer → risk memo. Ends with a push notification; you approve or reject each ticket by replying in that session, and approved tickets are paper-filled Monday |
+| **Monthly** | Claude Code cloud scheduled task | 1st of month 20:11 | Attribution, calibration, post-mortems, proposed lessons, janitor |
+
+The weekly work is split into three sessions more than five hours apart so no single run exhausts a Pro five-hour window.
 
 ## 7. Regime model
 
@@ -230,38 +236,47 @@ Schema: [`db/schema/001_core.sql`](../../db/schema/001_core.sql) (validated on P
 
 ## 12. Technology
 
-| Concern | Choice (proposed) | Why |
+| Concern | Choice | Why |
 |---|---|---|
-| Agents | Python 3.12 + Anthropic Python SDK (Claude API with the tool runner); all agents on Claude Opus 5.5 with effort tuned per agent; adaptive thinking; server-side refusal fallback enabled | Code controls the flow; each agent gets only the typed tools it needs (no shell, no file system) |
-| Contracts | Pydantic v2 models exported to JSON Schema | Same schema validates model output, DB rows and UI types |
-| Orchestration | A small in-repo DAG runner (asyncio) with run/step checkpoints in `ops.*` | Every step resumable and replayable; no extra platform |
-| Database | PostgreSQL via your existing Supabase project, raw payloads in Supabase Storage (or local `data/raw/`) | Already in the repo; relational + JSONB fits the schema |
+| Agent runtime | **Claude Code** in Anthropic's cloud (claude.ai/code), signed in with your **Claude Pro plan**. The orchestrator runs one `claude -p` step per agent with `--json-schema` (typed output), `--mcp-config` (read-only harness tools), `--allowedTools`, `--permission-mode dontAsk` and `--permission-prompts none` | No API key and no per-token bill; Claude Code already provides the agent loop, sub-agents, permissions and hooks the harness needs |
+| Model | Claude Opus 5.5, Pro-budget effort (low for research desks, medium for committee); options if limits bite are in `config/runtime.yaml` | Best judgment per unit of plan allowance |
+| Contracts | Pydantic v2 models exported to JSON Schema | The same schema validates agent output, database rows and UI types |
+| Orchestration | Small in-repo Python DAG runner; run and step checkpoints in `ops.*` | A run that hits a usage limit resumes from the last finished step after the reset |
+| Scheduling | Claude Code cloud scheduled tasks for agent runs (no claude.ai connectors attached); GitHub Actions cron for code-only jobs | Agent runs use the plan; deterministic jobs use none of it |
+| Database | PostgreSQL in your existing Supabase project; raw payloads in Supabase Storage | Cloud containers are wiped after each session, so durable state lives outside them |
+| Secrets | Cloud environment variables (and GitHub Actions secrets): `FRED_API_KEY`, `EIA_API_KEY`, `MASSIVE_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Never pasted into chat or committed |
+| Network | Cloud environment "Limited" access with the allow-list in `config/runtime.yaml` | Only the data sources and research sites the harness needs |
 | Quant | numpy/scipy, Black–Scholes and Black-76 (port of `src/lib/bsm.ts`), full-revaluation scenario engine | Deterministic, unit-tested |
-| Market data / broker | Massive (Polygon) for chains and bars; Interactive Brokers for positions, margin what-ifs and orders (paper first) | Both connectors are already attached to your Claude account |
-| Dashboard | Existing React + Vite + Tailwind app, rebuilt around the pages in §13 | Reuses v1 front end and Supabase auth |
-| Hosting | Docker Compose on one small VM (Postgres or Supabase, harness worker, UI) | Always-on scheduler without heavy infrastructure |
+| Execution | Internal paper broker that fills from stored option-chain snapshots; live broker integration decided after the paper phase | Works inside short-lived cloud sessions; no broker gateway to keep running |
+| Approvals | Reply in the committee session (push notification to your phone); optional dashboard published as a Claude artifact after each run | Nothing to host |
 
-**Model cost (rough estimate at list prices):** a weekly IC run is about 17 agent loops (11 desks, regime, CIO twice, red team, structurer, risk), roughly $10–15 with prompt caching; daily runs about $2–4. That is on the order of $100–250 per month, about 0.02–0.03% of a $1M book per year. Market data subscriptions (Massive options tier, any paid CAPE source) are separate.
+**Guards against surprise charges:** the preflight refuses to run if `ANTHROPIC_API_KEY` is set (it would switch Claude Code to API billing), runs never use `--bare` (which ignores the plan login), and runs never accept Claude Code's offer to continue on API credits when a limit is reached.
+
+**Plan usage:** each weekly cycle is three agent sessions plus a small monthly one, all shared with your normal Claude use. The first two weekly cycles will be measured; if they do not fit the Pro weekly allowance, the levers in `config/runtime.yaml` apply in order (lower effort, Sonnet 5.5 for research desks, alternate desks weekly, or a larger plan).
+
+**API mode stays available:** the runner is one interface with three backends (`claude_code_cloud`, `claude_code_local`, `anthropic_api`), so moving to the API later is a configuration change.
 
 **Proposed repository layout (Phase 1 onward):**
 
 ```
 AGENTS.md                 map of the repo for humans and coding agents
-config/                   agents.yaml, risk_policy.yaml, universe.yaml, data_sources.yaml
+.claude/agents/           one Claude Code sub-agent definition per agent (charter + tool allow-list)
+.github/workflows/        code-only cron jobs (ingest, monitor, events)
+config/                   agents.yaml, runtime.yaml, risk_policy.yaml, universe.yaml, data_sources.yaml
 contracts/                JSON Schemas for every agent output
 db/schema/                SQL (moves to supabase/migrations on approval)
 docs/design/              this design, HARNESS.md, OPEN_QUESTIONS.md, blueprint.html
 harness/                  Python package
-  orchestrator/           daily, weekly_ic, monthly, event, replay DAGs
-  data/adapters/          fred, treasury, nyfed, eia, cftc, cboe, shiller, gpr, oecd, bis, massive, ibkr
+  orchestrator/           daily, weekly (research_a, research_b, committee), monthly, event, replay
+  runner/                 claude_code_cloud | claude_code_local | anthropic_api
+  mcp/                    read-only harness tools exposed to agents (get_series_summary, submit_report, ...)
+  data/adapters/          fred, treasury, nyfed, eia, cftc, cboe, shiller, gpr, oecd, bis, massive
   data/steward.py         cache-first fetch, TTL, dedupe, vintages
-  tools/                  read-only agent tools, options math
-  agents/charters/        one versioned prompt per agent
   validators/             schema, citation, freshness, numeric consistency
   risk/                   policy engine + scenario engine (pure functions)
-  execution/              gateway: paper + IBKR
+  execution/              internal paper broker (live broker later)
   evals/                  golden cases, replay runner, calibration
-src/                      React dashboard
+src/                      React dashboard (optional; artifact dashboard covers Phase 1-5)
 supabase/                 v1 migrations and functions (retired as v2 lands)
 ```
 

@@ -1,0 +1,111 @@
+# =====================================================================
+# Runtime: where and how the harness runs.
+# Decision (2026-11-02): run inside Claude Code cloud sessions on the
+# owner's Claude Pro plan. No Anthropic API key, no per-token bill.
+# Deterministic jobs (ingest, marks, risk, alerts) run on GitHub Actions so
+# they use none of the plan's allowance.
+# =====================================================================
+runner:
+  default: claude_code_cloud          # alternatives kept behind the same interface: claude_code_local, anthropic_api
+  plan: pro
+  auth: claude_plan_login
+  preflight:
+    refuse_if_env_set: [ANTHROPIC_API_KEY]   # a set key silently switches Claude Code to API billing
+    never_accept_api_credit_offer: true
+    never_use_bare_mode: true                # --bare ignores the plan login
+  model: claude-opus-5-5
+  effort:                                    # Pro-budget defaults; raise only if quality needs it
+    research: low
+    valuation: low
+    volatility: low
+    regime: medium
+    cio: medium
+    red_team: medium
+    options_structurer: low
+    risk_manager: low
+    performance: medium
+    janitor: low
+  if_limits_bite:                            # owner decides, in this order
+    - lower effort further / smaller context packs
+    - run research desks on claude-sonnet-5-5
+    - run half the desks each week (alternating)
+    - upgrade plan
+  per_step_cli:                              # one claude -p call per agent step, launched by the orchestrator
+    - "-p"
+    - "--output-format json"
+    - "--json-schema contracts/<contract>.schema.json"
+    - "--mcp-config harness/mcp.json"         # read-only database tools, submit_report
+    - "--allowedTools mcp__harness__*"       # plus web tools for the five web desks only
+    - "--permission-mode dontAsk"
+    - "--permission-prompts none"
+  scheduled_task_connectors: []              # no claude.ai connectors in agent runs (least privilege)
+
+state:                                       # cloud containers are wiped after each session
+  database: supabase_postgres                # owner's existing Supabase project
+  raw_payloads: supabase_storage
+  phase1_check: >-
+    Confirm the cloud environment can reach the database. If the proxy blocks
+    direct Postgres connections, use Supabase's HTTPS API instead.
+
+secrets:                                     # set as environment variables in the cloud environment
+  - FRED_API_KEY                             # and as GitHub Actions repository secrets for code-only jobs
+  - EIA_API_KEY
+  - MASSIVE_API_KEY
+  - SUPABASE_URL
+  - SUPABASE_SERVICE_ROLE_KEY
+
+schedules:
+  code_only:                                 # GitHub Actions cron, zero Claude usage
+    - {id: ingest_morning, when: "weekdays 06:41 ET", job: "python -m harness.ingest"}
+    - {id: monitor_close,  when: "weekdays 16:47 ET", job: "python -m harness.monitor --code-only"}
+    - {id: ingest_evening, when: "weekdays 17:43 ET", job: "python -m harness.ingest"}
+    - {id: event_detector, when: "weekdays 17:53 ET", job: "python -m harness.events --alert"}   # emails you; you start an event run if needed
+  claude_cloud:                              # Claude Code cloud scheduled tasks, each in its own 5-hour window
+    - {id: research_a, when: "Sat 13:19 ET", agents: [liquidity, rates_credit, macro_cycle, valuation, volatility, us_equity]}
+    - {id: research_b, when: "Sat 19:37 ET", agents: [geopolitics, supply_chain, energy, metals, intl_equity]}
+    - {id: committee,  when: "Sun 14:41 ET", agents: [regime, cio, red_team, options_structurer, risk_manager],
+       ends_with: "push notification; you approve or reject tickets by replying in that session"}
+    - {id: monthly,    when: "1st of month 20:11 ET", agents: [performance, janitor]}
+
+execution:
+  paper_broker: internal                     # fills simulated from stored chain snapshots; no broker needed in the cloud
+  live: deferred                             # decided after the paper phase
+
+network_allowlist:                           # cloud environment settings > Network access > Allowed domains
+  data:
+    - api.stlouisfed.org
+    - fred.stlouisfed.org
+    - api.fiscaldata.treasury.gov
+    - markets.newyorkfed.org
+    - www.newyorkfed.org
+    - api.eia.gov
+    - publicreporting.cftc.gov
+    - cdn.cboe.com
+    - shillerdata.com
+    - www.econ.yale.edu
+    - www.matteoiacoviello.com
+    - sdmx.oecd.org
+    - stats.bis.org
+    - data.bis.org
+    - api.imf.org
+    - api.worldbank.org
+    - thedocs.worldbank.org
+    - www.atlantafed.org
+    - api.massive.com
+    - api.polygon.io
+    - "<project-ref>.supabase.co"
+  web_research:
+    - www.federalreserve.gov
+    - www.ecb.europa.eu
+    - www.boj.or.jp
+    - www.bankofengland.co.uk
+    - www.opec.org
+    - www.iea.org
+    - www.eia.gov
+    - www.imf.org
+    - www.bis.org
+    - www.reuters.com
+    - apnews.com
+    - www.drewry.co.uk
+    - www.freightos.com
+    - www.wto.org

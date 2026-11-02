@@ -11,15 +11,16 @@
 # Status: DESIGN DRAFT.
 # =====================================================================
 defaults:
-  model: claude-opus-5-5          # one model, effort tuned per agent (see OPEN_QUESTIONS Q9 for a cheaper triage tier)
+  runner: claude_code_cloud       # Claude Code on the owner's Pro plan; see config/runtime.yaml
+  model: claude-opus-5-5          # effort per agent is overridden by config/runtime.yaml (Pro-budget)
   thinking: adaptive
   effort: medium
   max_tool_calls: 40
   max_attempts: 3                 # first try + 2 remediation retries
   step_timeout_s: 600
-  step_budget_usd: 2.50
+  step_budget_usd: 2.50           # API-equivalent estimate from claude -p output; tracked, not billed on the plan
   context_pack_max_tokens: 30000
-  refusal_fallbacks: default      # server-side fallback enabled on the API request
+  refusal_fallbacks: default      # applies only when runner = anthropic_api
   history: append_only            # remediation is appended as a new turn, never edits history
 
 tool_groups:
