@@ -1,0 +1,311 @@
+<meta name="dash-one-writer">
+<style>
+  .ic { display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); }
+  .ic-head { display: grid; gap: var(--cds-gap-sm); }
+  .ic-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+  .ic-take { font-size: var(--cds-font-size-body); color: var(--color-fg); margin: 0; max-width: 72ch; }
+  .ic .ic-take b, .ic .tile b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ic-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+  .ic-chip { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); border: 1px solid var(--color-border-line); border-radius: 999px; padding: 2px 10px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); gap: var(--cds-gap-md); }
+  .tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); display: grid; gap: var(--cds-gap-xs); align-content: start; }
+  .tile .lab { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ic .tile .val { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; }
+  .tile .note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .sec { display: grid; gap: var(--cds-gap-md); }
+  .sec h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .sec > p { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); max-width: 80ch; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+  .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); align-content: start; min-width: 0; }
+  .card h3 { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .card .sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; }
+  .chart { position: relative; min-height: 180px; }
+  .tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; }
+  .tip .k { color: var(--cds-text-secondary); }
+  .agents { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: var(--cds-gap-md); }
+  .agent { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); display: grid; gap: var(--cds-gap-xs); align-content: start; min-width: 0; }
+  .agent .top { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); align-items: baseline; }
+  .agent .nm { font-weight: var(--cds-font-weight-medium); }
+  .agent .meta, .agent .st { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .agent .st.ok { color: var(--color-ok); }
+  .agent .st.warn { color: var(--color-warn); }
+  .agent .stance { font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .agent p { margin: 0; font-size: var(--cds-font-size-caption); line-height: 1.5; }
+  .agent ul { margin: 0; padding-left: 1.1em; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: grid; gap: 2px; }
+  .tbox { overflow: auto; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); }
+  .tbox.tall { max-height: 26rem; }
+  .ic table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .ic th, .ic td { text-align: left; padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+  .ic th { position: sticky; top: 0; background: var(--color-panel); color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
+  .ic td.n, .ic th.n { text-align: right; }
+  .pos { color: var(--color-ok); }
+  .neg { color: var(--color-bad); }
+  .warnc { color: var(--color-warn); }
+  [data-dash-source-state=empty] { color: transparent; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+
+<div class="ic">
+  <header class="ic-head">
+    <h1 class="ic-title" id="top">Macro Trader Weekly IC · week of Nov 2, 2026</h1>
+    <p class="ic-take">Reflation (<b data-draw="regime-word" data-source="regime" data-field="final" data-where="regime=Reflation">—</b>) and stagflation (<b data-draw="regime-word" data-source="regime" data-field="final" data-where="regime=Stagflation">—</b>) are nearly tied as a war-driven oil shock meets a Fed that is still hiking. <b data-draw="count" data-source="ticket_counts" data-field="current">—</b> trade qualifies under the current risk policy and <b data-draw="count" data-source="ticket_counts" data-field="proposed">—</b> qualify if you lower the minimum-credit rule; no entries before the Nov 3 election.</p>
+    <div class="ic-chips"><span class="ic-chip">Run 0 · manual first run in one Claude Code session</span><span class="ic-chip">Paper mode</span><span class="ic-chip">Data as of Oct 30 – Nov 2, 2026</span><span class="ic-chip">Strikes are model estimates</span></div>
+  </header>
+
+  <section class="sec" id="headline">
+    <div class="tiles">
+      <div class="tile"><span class="lab">Fed funds (the hurdle)</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=hurdle">—</b><span class="note">Collateral earns about this</span></div>
+      <div class="tile"><span class="lab">WTI crude</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=wti">—</b><span class="note">Brent <b data-draw="kpi" data-source="kpi" data-field="value" data-where="id=brent">—</b></span></div>
+      <div class="tile"><span class="lab">2-year minus Fed funds</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=t2y_minus_ff">—</b><span class="note">More hikes priced</span></div>
+      <div class="tile"><span class="lab">US Shiller CAPE</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=cape">—</b><span class="note">Near the 1999 dot-com peak</span></div>
+      <div class="tile"><span class="lab">VIX</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=vix">—</b><span class="note">Equity vol, mid-range</span></div>
+      <div class="tile"><span class="lab">US net liquidity, 13 weeks</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=net_liq_13w">—</b><span class="note">Fed assets − TGA − reverse repo</span></div>
+    </div>
+  </section>
+
+  <section class="sec" id="regime">
+    <h2>Regime</h2>
+    <p>Code turns the growth and inflation scores into four probabilities (prior). The Regime Strategist may move each by a bounded amount, citing evidence (final).</p>
+    <div class="grid2">
+      <div class="card"><h3>Regime probabilities</h3><p class="sub">Prior from code vs final after the strategist's adjustment, %</p>
+        <div class="chart" data-draw="regime-chart" data-source="regime"></div></div>
+      <div class="card"><h3>Macro readings behind it</h3><p class="sub">Latest stored values</p>
+        <div class="tiles">
+          <div class="tile"><span class="lab">Core CPI, 3-month annualized</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=core_cpi_3m">—</b></div>
+          <div class="tile"><span class="lab">Payrolls, 3-month average</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=payrolls_3m">—</b></div>
+          <div class="tile"><span class="lab">10-year real yield</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=real_10y">—</b></div>
+          <div class="tile"><span class="lab">Geopolitical risk, 30-day vs 10 years</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=gpr_pctile">—</b></div>
+          <div class="tile"><span class="lab">Supply-chain pressure (GSCPI)</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=gscpi">—</b></div>
+        </div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="agents">
+    <h2>What each agent did this week</h2>
+    <p>Every Claude desk returned a typed report; code checked each cited number against the stored data. Stance is negative for bearish or contracting and positive for bullish or expanding.</p>
+    <div class="agents" data-draw="agents" data-source="agents"></div>
+  </section>
+
+  <section class="sec" id="sleeves">
+    <h2>Committee decisions by asset class</h2>
+    <p>Playbook score is the probability-weighted regime playbook; the liquidity modifier lowers the equity sleeves because liquidity is draining. A large enough score takes a side; otherwise the sleeve is neutral.</p>
+    <div class="tbox"><table data-source="sleeves" data-row-key="sleeve">
+      <thead><tr><th data-field="sleeve">Asset class</th><th class="n" data-field="playbook_score">Playbook</th><th class="n" data-field="after_modifiers">After modifiers</th><th class="n" data-field="direction">Direction</th><th class="n" data-field="conviction">Conviction</th><th data-field="action">Action</th><th data-field="status">Status</th></tr></thead>
+      <tbody data-draw="sleeves-body"></tbody></table></div>
+  </section>
+
+  <section class="sec" id="trades">
+    <h2>Proposed trades (paper, December 18 expiry)</h2>
+    <p>Defined-risk spreads only. Strikes and credits are Black–Scholes estimates from stored implied-vol indices because the current data plan has no option chains; re-price on a live chain before approving.</p>
+    <div class="tbox"><table data-source="tickets" data-row-key="book,id">
+      <thead><tr><th data-field="book">Book</th><th data-field="id">Ticket</th><th data-field="instrument">Underlying</th><th data-field="structure">Structure</th><th data-field="legs">Legs</th><th class="n" data-field="quantity">Qty</th><th class="n" data-field="credit_total">Credit</th><th class="n" data-field="max_loss_total">Max loss</th><th class="n" data-field="credit_pct_width">Credit % width</th><th class="n" data-field="return_on_risk_pct">Return on risk</th><th data-field="status">Status</th></tr></thead>
+      <tbody data-draw="tickets-body"></tbody></table></div>
+  </section>
+
+  <section class="sec" id="checks">
+    <h2>Risk engine and red team</h2>
+    <p>Risk-engine blocks are final. The red team argued against the plan in a separate context; the CIO answered each challenge.</p>
+    <div class="tbox"><table data-source="issues" data-row-key="id">
+      <thead><tr><th data-field="id">#</th><th data-field="kind">From</th><th data-field="item">Item</th><th data-field="detail">Detail or fix</th><th data-field="response">Outcome</th></tr></thead>
+      <tbody data-draw="issues-body"></tbody></table></div>
+  </section>
+
+  <section class="sec" id="markets">
+    <h2>Markets</h2>
+    <div class="grid2">
+      <div class="card"><h3>Volatility premium</h3><p class="sub">Implied vol index minus 20-day realized vol, points. Higher means richer premium to sell.</p>
+        <div class="chart" data-draw="vol-chart" data-source="etfs"></div></div>
+      <div class="card"><h3>Tradable ETFs</h3><p class="sub">Returns %, distance from 200-day average %, 20-day realized vol %</p>
+        <div class="tbox tall"><table data-source="etfs" data-row-key="ticker">
+          <thead><tr><th data-field="ticker">ETF</th><th class="n" data-field="close">Close</th><th class="n" data-field="ret_1m">1m</th><th class="n" data-field="ret_3m">3m</th><th class="n" data-field="ret_12m">12m</th><th class="n" data-field="vs_200dma">vs 200d</th><th class="n" data-field="drawdown_52w">From high</th><th class="n" data-field="rv20">RV20</th></tr></thead>
+          <tbody data-draw="etfs-body"></tbody></table></div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="data">
+    <h2>Data used and provenance</h2>
+    <p>Every series the agents read, with its last observation and the hash of the stored payload. News items are archived documents cited by the desks.</p>
+    <div class="tbox tall"><table data-source="provenance" data-row-key="id">
+      <thead><tr><th data-field="id">Source id</th><th data-field="kind">Kind</th><th data-field="last_obs">Last observation</th><th class="n" data-field="age_days">Age (days)</th><th data-field="detail">Detail</th></tr></thead>
+      <tbody data-draw="provenance-body"></tbody></table></div>
+  </section>
+</div>
+
+<script>
+  dash.calc('ticket_counts', {
+    inputs: ['tickets'],
+    title: 'Trades per book',
+    description: 'Counts the proposed tickets under the current policy and under the proposed minimum-credit change.',
+    fn: (tickets) => [{
+      current: tickets.filter((t) => t.book === 'Current policy').length,
+      proposed: tickets.filter((t) => t.book !== 'Current policy').length,
+    }],
+  });
+
+  const num = (v) => (v === null || v === undefined || v === '' ? null : Number(v));
+  const f1 = d3.format('.1f'), f2 = d3.format('.2f'), money = d3.format('$,.0f'), comma = d3.format(',');
+  const signed = (v, digits = 1) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(digits);
+  const where = (el) => Object.fromEntries((el.dataset.where || '').split('&').filter(Boolean).map((p) => p.split('=').map(decodeURIComponent)));
+  const pick = (rows, el) => { const w = where(el); return rows.find((r) => Object.entries(w).every(([k, v]) => String(r[k]) === v)); };
+  const fmtKpi = (r) => {
+    const v = num(r.value);
+    switch (r.unit) {
+      case '%': return f2(v) + '%';
+      case '$': return '$' + f2(v);
+      case 'bp': return signed(v, 0) + ' bp';
+      case '$bn': return signed(v, 0).replace(/^([+−])/, '$1$') + 'bn';
+      case 'x': return f1(v) + '×';
+      case 'pct': return f1(v).replace('.0', '') + 'th pct';
+      case 'k': return comma(v) + 'k';
+      case 'sd': return f2(v);
+      default: return f1(v);
+    }
+  };
+
+  dash.draw('kpi', (el) => {
+    const d = dash.data('kpi');
+    if (d.status !== 'ok') { el.textContent = '—'; el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
+    el.classList.remove('dash-skeleton');
+    const r = pick(d.data, el);
+    el.textContent = r ? fmtKpi(r) : '—';
+  });
+
+  dash.draw('regime-word', (el) => {
+    const d = dash.data('regime');
+    const r = d.status === 'ok' ? pick(d.data, el) : null;
+    el.textContent = r ? f1(num(r.final)) + '%' : '—';
+  });
+
+  dash.draw('count', (el) => {
+    const d = dash.data('ticket_counts');
+    const r = d.status === 'ok' ? d.data[0] : null;
+    el.textContent = r ? String(r[el.dataset.field]) : '—';
+  });
+
+  function hbars(el, rows, series, opts) {
+    // rows: [{label, values:[...]}], series: [{name, color}]
+    el.replaceChildren();
+    const width = Math.max(260, el.clientWidth);
+    const rowH = opts.rowH || 34, barH = Math.min(14, (rowH - 8) / series.length);
+    const svg = d3.select(el).append('svg').attr('width', '100%');
+    const probe = svg.append('text').attr('font-size', 12).style('font-family', 'var(--font-anthropic-sans)');
+    const labW = d3.max(rows, (r) => { probe.text(r.label); return probe.node().getComputedTextLength(); }) + 12;
+    probe.text(opts.fmt(d3.max(rows, (r) => d3.max(r.values)))); const valW = probe.node().getComputedTextLength() + 10;
+    probe.remove();
+    const top = series.length > 1 ? 22 : 4, h = top + rows.length * rowH + 4;
+    svg.attr('viewBox', `0 0 ${width} ${h}`);
+    const lo = Math.min(0, d3.min(rows, (r) => d3.min(r.values))), hi = Math.max(0, d3.max(rows, (r) => d3.max(r.values)));
+    const x = d3.scaleLinear([lo, hi], [labW, width - valW]);
+    if (series.length > 1) {
+      const lg = svg.append('g').attr('transform', `translate(${labW},12)`);
+      let off = 0;
+      series.forEach((s) => {
+        lg.append('rect').attr('x', off).attr('y', -8).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', s.color);
+        const t = lg.append('text').attr('x', off + 14).attr('y', 1).attr('font-size', 12).attr('fill', 'var(--color-fg-muted)').text(s.name);
+        off += 14 + t.node().getComputedTextLength() + 16;
+      });
+    }
+    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', top).attr('y2', h - 4).attr('stroke', 'var(--cds-chart-axis)');
+    const tip = d3.select(el).append('div').attr('class', 'tip').style('opacity', 0);
+    rows.forEach((r, i) => {
+      const y0 = top + i * rowH;
+      svg.append('text').attr('x', 0).attr('y', y0 + rowH / 2 + 4).attr('font-size', 12).attr('fill', 'var(--color-fg)').text(r.label);
+      r.values.forEach((v, j) => {
+        const y = y0 + (rowH - barH * series.length) / 2 + j * barH;
+        const rect = svg.append('rect').attr('x', Math.min(x(0), x(v))).attr('y', y).attr('height', barH - 2)
+          .attr('width', Math.max(1, Math.abs(x(v) - x(0)))).attr('rx', 2).attr('fill', series[j].color);
+        svg.append('text').attr('x', Math.max(x(0), x(v)) + 4).attr('y', y + barH - 4).attr('font-size', 11)
+          .attr('fill', 'var(--color-fg-muted)').text(opts.fmt(v));
+        rect.on('mousemove', (ev) => {
+          const [mx, my] = d3.pointer(ev, el);
+          tip.style('opacity', 1).style('left', Math.min(mx + 10, el.clientWidth - 160) + 'px').style('top', (my - 30) + 'px')
+            .html('');
+          tip.append('div').attr('class', 'k').text(r.label);
+          tip.append('div').text(`${series[j].name}: ${opts.fmt(v)}`);
+        }).on('mouseleave', () => tip.style('opacity', 0));
+      });
+    });
+  }
+
+  dash.draw('regime-chart', (el) => {
+    const d = dash.data('regime');
+    if (d.status !== 'ok') { el.replaceChildren(); el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
+    el.classList.remove('dash-skeleton');
+    const rows = d.data.map((r) => ({ label: r.regime, values: [num(r.prior), num(r.final)] }));
+    hbars(el, rows, [{ name: 'Prior (code)', color: 'var(--cds-chart-muted)' }, { name: 'Final (after strategist)', color: dash.colors[0] }],
+      { fmt: (v) => f1(v) + '%', rowH: 38 });
+  });
+
+  dash.draw('vol-chart', (el) => {
+    const d = dash.data('etfs');
+    if (d.status !== 'ok') { el.replaceChildren(); el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
+    el.classList.remove('dash-skeleton');
+    const rows = d.data.filter((r) => r.vol_premium !== null && r.vol_premium !== undefined && r.vol_premium !== '')
+      .map((r) => ({ label: r.ticker, values: [num(r.vol_premium)] })).sort((a, b) => b.values[0] - a.values[0]);
+    hbars(el, rows, [{ name: 'Premium', color: dash.colors[1] }], { fmt: (v) => signed(v, 1) + ' pts', rowH: 32 });
+  });
+
+  dash.draw('agents', (el) => {
+    const d = dash.data('agents');
+    el.replaceChildren();
+    if (d.status !== 'ok') { el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
+    el.classList.remove('dash-skeleton');
+    d.data.forEach((a) => {
+      const card = document.createElement('article'); card.className = 'agent';
+      const top = document.createElement('div'); top.className = 'top';
+      const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = a.name;
+      const st = document.createElement('span'); st.className = 'st ' + (/validated|^Ran$/.test(a.status) ? 'ok' : /Waiting/.test(a.status) ? 'warn' : '');
+      st.textContent = a.status; top.append(nm, st);
+      const meta = document.createElement('span'); meta.className = 'meta'; meta.textContent = `${a.layer} · ${a.kind}`;
+      card.append(top, meta);
+      const bits = [];
+      if (a.stance_label) bits.push(a.stance_label);
+      if (num(a.stance_score) !== null) bits.push('stance ' + signed(num(a.stance_score), 1));
+      if (num(a.confidence) !== null) bits.push('confidence ' + d3.format('.0%')(num(a.confidence)));
+      if (num(a.citations) !== null) bits.push(a.citations + ' citations checked');
+      if (bits.length) { const s = document.createElement('span'); s.className = 'stance'; s.textContent = bits.join(' · '); card.append(s); }
+      const p = document.createElement('p'); p.textContent = a.summary; card.append(p);
+      if (a.findings) {
+        const ul = document.createElement('ul');
+        String(a.findings).split(' | ').forEach((f) => { const li = document.createElement('li'); li.textContent = f; ul.append(li); });
+        card.append(ul);
+      }
+      el.append(card);
+    });
+  });
+
+  function body(name, id, cols) {
+    dash.draw(name, (tb) => {
+      const d = dash.data(id);
+      tb.replaceChildren();
+      if (d.status !== 'ok') return;
+      d.data.forEach((r) => {
+        const tr = document.createElement('tr');
+        cols.forEach(([field, fmt, cls]) => {
+          const td = document.createElement('td');
+          const v = r[field];
+          td.textContent = v === null || v === undefined || v === '' ? '' : fmt ? fmt(v, r) : String(v);
+          const c = typeof cls === 'function' ? cls(v, r) : cls;
+          if (c) td.className = c;
+          tr.append(td);
+        });
+        tb.append(tr);
+      });
+    });
+  }
+  const pct = (v) => signed(num(v), 1);
+  const sgn = (v) => (num(v) > 0 ? 'n pos' : num(v) < 0 ? 'n neg' : 'n');
+  body('sleeves-body', 'sleeves', [['sleeve'], ['playbook_score', (v) => signed(num(v), 2), 'n'], ['after_modifiers', (v) => signed(num(v), 2), sgn],
+    ['direction', (v) => (num(v) > 0 ? 'Bullish' : num(v) < 0 ? 'Bearish' : 'Neutral'), 'n'], ['conviction', (v) => f2(num(v)), 'n'],
+    ['action'], ['status', null, (v) => (v === 'Policy-compliant' ? 'pos' : v === 'Needs policy change' ? 'warnc' : '')]]);
+  body('tickets-body', 'tickets', [['book'], ['id'], ['instrument'], ['structure'], ['legs'], ['quantity', (v) => comma(num(v)), 'n'],
+    ['credit_total', (v) => money(num(v)), 'n'], ['max_loss_total', (v) => money(num(v)), 'n'], ['credit_pct_width', (v) => f1(num(v)) + '%', 'n'],
+    ['return_on_risk_pct', (v) => f1(num(v)) + '%', 'n'], ['status']]);
+  body('issues-body', 'issues', [['id'], ['kind'], ['item'], ['detail'], ['response', null, (v, r) => (r.severity === 'block' ? 'neg' : r.severity === 'decision' ? 'warnc' : '')]]);
+  body('etfs-body', 'etfs', [['ticker'], ['close', (v) => f2(num(v)), 'n'], ['ret_1m', pct, sgn], ['ret_3m', pct, sgn], ['ret_12m', pct, sgn],
+    ['vs_200dma', pct, sgn], ['drawdown_52w', pct, 'n'], ['rv20', (v, r) => f1(num(v)) + (r.data_flag ? ' (check)' : ''), (v, r) => (r.data_flag ? 'n warnc' : 'n')]]);
+  body('provenance-body', 'provenance', [['id'], ['kind'], ['last_obs'], ['age_days', (v) => comma(num(v)), 'n'], ['detail']]);
+
+  const named = document.getElementById(location.hash.slice(1));
+  if (named) { named.scrollIntoView(); dash.setLink(named.id); }
+</script>

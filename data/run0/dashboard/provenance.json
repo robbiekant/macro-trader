@@ -1,0 +1,590 @@
+[
+ {
+  "id": "fred:WALCL",
+  "kind": "FRED series",
+  "last_obs": "2026-10-28",
+  "age_days": 5,
+  "detail": "sha256 0c2d6b00ebc9, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:WTREGEN",
+  "kind": "FRED series",
+  "last_obs": "2026-10-28",
+  "age_days": 5,
+  "detail": "sha256 237b026208bb, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:RRPONTSYD",
+  "kind": "FRED series",
+  "last_obs": "2026-10-30",
+  "age_days": 3,
+  "detail": "sha256 d625f62a50de, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:WRESBAL",
+  "kind": "FRED series",
+  "last_obs": "2026-10-28",
+  "age_days": 5,
+  "detail": "sha256 929d6e494358, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:M2SL",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 0c9b7b87f42c, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:ECBASSETSW",
+  "kind": "FRED series",
+  "last_obs": "2026-10-23",
+  "age_days": 10,
+  "detail": "sha256 a331076aa643, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:JPNASSETS",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 a163b30d3a7e, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DTWEXBGS",
+  "kind": "FRED series",
+  "last_obs": "2026-10-23",
+  "age_days": 10,
+  "detail": "sha256 039d05c7a5c9, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:NFCI",
+  "kind": "FRED series",
+  "last_obs": "2026-10-23",
+  "age_days": 10,
+  "detail": "sha256 acff7aad2d90, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DEXJPUS",
+  "kind": "FRED series",
+  "last_obs": "2026-10-23",
+  "age_days": 10,
+  "detail": "sha256 899c5333e36f, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DFF",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 78e131b2102c, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DFEDTARU",
+  "kind": "FRED series",
+  "last_obs": "2026-11-01",
+  "age_days": 1,
+  "detail": "sha256 9fe069efa074, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:SOFR",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 9f1c6d50a282, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DGS3MO",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 5511f9379c5b, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DGS2",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 6e2234b7b4fb, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DGS10",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 d58ad5e04878, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DGS30",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 5d27f4acdfbf, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:T10Y3M",
+  "kind": "FRED series",
+  "last_obs": "2026-10-30",
+  "age_days": 3,
+  "detail": "sha256 8ee5ada41f1f, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:T10Y2Y",
+  "kind": "FRED series",
+  "last_obs": "2026-10-30",
+  "age_days": 3,
+  "detail": "sha256 9d419b7056cb, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:DFII10",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 5659bb689562, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:T10YIE",
+  "kind": "FRED series",
+  "last_obs": "2026-10-30",
+  "age_days": 3,
+  "detail": "sha256 1e2ee6a5bdba, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:T5YIFR",
+  "kind": "FRED series",
+  "last_obs": "2026-10-30",
+  "age_days": 3,
+  "detail": "sha256 bb5919ddace0, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:BAMLH0A0HYM2",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 aacdbb69ad77, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:BAMLC0A0CM",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 fdc279e5c649, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:ECBDFR",
+  "kind": "FRED series",
+  "last_obs": "2026-10-30",
+  "age_days": 3,
+  "detail": "sha256 561b30730e7c, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:CPIAUCSL",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 047ce86c7e14, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:CPILFESL",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 01a4cc4a1db2, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:PCEPILFE",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 3a49099c9966, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:UNRATE",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 9b43548b7eb8, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:SAHMREALTIME",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 b3d2cb453593, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:ICSA",
+  "kind": "FRED series",
+  "last_obs": "2026-10-24",
+  "age_days": 9,
+  "detail": "sha256 17efb8f85a5c, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:CCSA",
+  "kind": "FRED series",
+  "last_obs": "2026-10-17",
+  "age_days": 16,
+  "detail": "sha256 01b7b06fbb92, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:PAYEMS",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 96ea002ac6f6, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:INDPRO",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 6acc08fe4e9b, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:GDPNOW",
+  "kind": "FRED series",
+  "last_obs": "2026-10-01",
+  "age_days": 32,
+  "detail": "sha256 b9ba0aee2830, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:MICH",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 0638c0abaf90, fetched 2026-11-02T05:08Z"
+ },
+ {
+  "id": "fred:RSAFS",
+  "kind": "FRED series",
+  "last_obs": "2026-09-01",
+  "age_days": 62,
+  "detail": "sha256 b90e1795b1a7, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:GACDFSA066MSFRBPHI",
+  "kind": "FRED series",
+  "last_obs": "2026-10-01",
+  "age_days": 32,
+  "detail": "sha256 f61776ff878e, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:ISRATIO",
+  "kind": "FRED series",
+  "last_obs": "2026-08-01",
+  "age_days": 93,
+  "detail": "sha256 6bfe9d28d911, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:USEPUINDXD",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 9717c7ab0009, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:DCOILWTICO",
+  "kind": "FRED series",
+  "last_obs": "2026-10-27",
+  "age_days": 6,
+  "detail": "sha256 84287335a576, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:DCOILBRENTEU",
+  "kind": "FRED series",
+  "last_obs": "2026-10-27",
+  "age_days": 6,
+  "detail": "sha256 efed41af12ef, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:DHHNGSP",
+  "kind": "FRED series",
+  "last_obs": "2026-10-27",
+  "age_days": 6,
+  "detail": "sha256 bed8629bc07d, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:VIXCLS",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 a1875c090961, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:OVXCLS",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 5b1bda1eee4c, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:GVZCLS",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 93c83f1f07d5, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:VXEEMCLS",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 e63d339d1589, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:SP500",
+  "kind": "FRED series",
+  "last_obs": "2026-10-28",
+  "age_days": 5,
+  "detail": "sha256 12492c33d5b9, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "fred:VXVCLS",
+  "kind": "FRED series",
+  "last_obs": "2026-10-29",
+  "age_days": 4,
+  "detail": "sha256 36529b96f71b, fetched 2026-11-02T05:10Z"
+ },
+ {
+  "id": "eia:PET.WCESTUS1.W",
+  "kind": "EIA",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 f738af59ac2f, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "eia:PET.W_EPC0_SAX_YCUOK_MBBL.W",
+  "kind": "EIA",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 1851f9e22649, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "eia:PET.WCRFPUS2.W",
+  "kind": "EIA",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 7c913396ad79, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "eia:NG.NW2_EPG0_SWO_R48_BCF.W",
+  "kind": "EIA",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 dbd4f234b1c1, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "massive:SPY",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 1a4c0b553aea, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "massive:QQQ",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 401c6470b9ce, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "massive:IWM",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 66c26919d35a, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "massive:EFA",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 336fe58a696f, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "massive:EEM",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 9a644e888cab, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "gpr:daily",
+  "kind": "GPR",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 a4cecd9b807b, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "gpr:monthly",
+  "kind": "GPR",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 97af83991360, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "nyfed:GSCPI",
+  "kind": "Nyfed",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 781bc95d377d, fetched 2026-11-02T05:09Z"
+ },
+ {
+  "id": "massive:FEZ",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 436e26c5aaf3, fetched 2026-11-02T05:10Z"
+ },
+ {
+  "id": "massive:EWJ",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 60d40906653a, fetched 2026-11-02T05:10Z"
+ },
+ {
+  "id": "massive:FXI",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 770f0485e9b4, fetched 2026-11-02T05:11Z"
+ },
+ {
+  "id": "massive:INDA",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 12d49012c466, fetched 2026-11-02T05:11Z"
+ },
+ {
+  "id": "massive:EWZ",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 c439676c7b4e, fetched 2026-11-02T05:11Z"
+ },
+ {
+  "id": "massive:GLD",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 8f35832283ac, fetched 2026-11-02T05:11Z"
+ },
+ {
+  "id": "massive:SLV",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 f34da6b0f2d1, fetched 2026-11-02T05:12Z"
+ },
+ {
+  "id": "massive:USO",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 461968144cb2, fetched 2026-11-02T05:12Z"
+ },
+ {
+  "id": "massive:UNG",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 37c77640df6a, fetched 2026-11-02T05:12Z"
+ },
+ {
+  "id": "massive:XLE",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 07929b8adc4d, fetched 2026-11-02T05:12Z"
+ },
+ {
+  "id": "massive:TLT",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 6e2cf14180bd, fetched 2026-11-02T05:12Z"
+ },
+ {
+  "id": "massive:HYG",
+  "kind": "Massive",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 8590fc1a5f49, fetched 2026-11-02T05:13Z"
+ },
+ {
+  "id": "datahub:sp500_pe10",
+  "kind": "Datahub",
+  "last_obs": null,
+  "age_days": null,
+  "detail": "sha256 b797a3c8de45, fetched 2026-11-02T05:13Z"
+ },
+ {
+  "id": "doc:1",
+  "kind": "News / official",
+  "last_obs": "2026-10-30",
+  "age_days": null,
+  "detail": "Nairametrics: Brent up ~13% in October on Middle East hostilities (US, Israel, Iran) disrupting crude flows. (https://nairametrics.com/2026/10/30/brent-crude-surges-13-in-october-as-middle-east-attacks-threaten-oil-supplies/)"
+ },
+ {
+  "id": "doc:2",
+  "kind": "News / official",
+  "last_obs": "2026-10-16",
+  "age_days": null,
+  "detail": "Nation Thailand: Brent back at $110 on a missile attack near a Saudi oil port, Iranian attacks in the Strait of Hormuz, reduced Russian refining. (https://www.nationthailand.com/news/world/40072388)"
+ },
+ {
+  "id": "doc:3",
+  "kind": "News / official",
+  "last_obs": "2026-10",
+  "age_days": null,
+  "detail": "AJOT: Oil jumps on escalating tanker attacks in the Middle East. (https://www.ajot.com/news/oil-jumps-to-105-a-barrel-aftermiddle-east-tanker-attacks-escalate)"
+ },
+ {
+  "id": "doc:4",
+  "kind": "News / official",
+  "last_obs": "2026-10-28",
+  "age_days": null,
+  "detail": "Federal Reserve: FOMC holds the target range at 3.75-4.00% (IORB 3.90%). (https://federalreserve.gov/newsevents/pressreleases/monetary20261028a.htm)"
+ },
+ {
+  "id": "doc:5",
+  "kind": "News / official",
+  "last_obs": "2026-10-28",
+  "age_days": null,
+  "detail": "Admiral Markets: Fed holds in a 10-2 vote with hawkish dissent; markets price a December hike; September meeting hiked 25bp. (https://admiralmarkets.com/analytics/traders-blog/fomc-october-2026-fed-holds-rates)"
+ },
+ {
+  "id": "doc:6",
+  "kind": "News / official",
+  "last_obs": "2026-10-09",
+  "age_days": null,
+  "detail": "Finnovate: Shiller CAPE monthly reading 41.07 for October 2026; daily estimate 41.62 on Oct 8; peak 44.19 in Dec 1999. (https://www.finnovate.in/learn/blog/shiller-cape-ratio-us-stock-market-2026)"
+ },
+ {
+  "id": "doc:7",
+  "kind": "News / official",
+  "last_obs": "2026-10",
+  "age_days": null,
+  "detail": "KuCoin News: S&P 500 CAPE ~41, highest since the dot-com bubble. (https://www.kucoin.com/news/flash/s-p-500-cape-ratio-hits-41-highest-since-dot-com-bubble)"
+ },
+ {
+  "id": "doc:8",
+  "kind": "News / official",
+  "last_obs": "2026-10",
+  "age_days": null,
+  "detail": "Ventura Securities: Spot gold fell to about $4,016/oz, lowest since July 20, 2026; steepest weekly fall in four months. (https://www.venturasecurities.com/?p=65816)"
+ },
+ {
+  "id": "doc:9",
+  "kind": "News / official",
+  "last_obs": "2026-10-27",
+  "age_days": null,
+  "detail": "StartupTalky: Versus last month, gold down 5.69% and silver down 17.47%. (https://startuptalky.com/news/gold-silver-prices-india-today-27-october-2026-both-metals-fall/)"
+ },
+ {
+  "id": "doc:10",
+  "kind": "News / official",
+  "last_obs": "2026-10-23",
+  "age_days": null,
+  "detail": "Ascendants: Metals weaker on rising crude, inflation concerns and expectations of another Fed hike before year-end. (https://ascendants.in/my-money/gold-silver-rate-today-october-23-2026-24k-22k-city-wise-prices/)"
+ }
+]

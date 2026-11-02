@@ -1,0 +1,86 @@
+[
+ {
+  "id": "hurdle",
+  "label": "Fed funds (hurdle)",
+  "value": 3.88,
+  "unit": "%",
+  "note": "Effective rate, Oct 2026"
+ },
+ {
+  "id": "wti",
+  "label": "WTI crude",
+  "value": 103.37,
+  "unit": "$",
+  "note": "+66.38% in 12 months"
+ },
+ {
+  "id": "brent",
+  "label": "Brent crude",
+  "value": 123.1,
+  "unit": "$",
+  "note": "Seaborne benchmark"
+ },
+ {
+  "id": "vix",
+  "label": "VIX",
+  "value": 17.2,
+  "unit": "",
+  "note": "S&P 500 30-day implied vol"
+ },
+ {
+  "id": "cape",
+  "label": "US Shiller CAPE",
+  "value": 41.07,
+  "unit": "x",
+  "note": "October 2026, published estimate"
+ },
+ {
+  "id": "net_liq_13w",
+  "label": "US net liquidity, 13 weeks",
+  "value": -79.0,
+  "unit": "$bn",
+  "note": "Fed assets - TGA - reverse repo"
+ },
+ {
+  "id": "t2y_minus_ff",
+  "label": "2-year minus Fed funds",
+  "value": 73.0,
+  "unit": "bp",
+  "note": "Hikes priced"
+ },
+ {
+  "id": "real_10y",
+  "label": "10-year real yield",
+  "value": 2.63,
+  "unit": "%",
+  "note": "TIPS"
+ },
+ {
+  "id": "gpr_pctile",
+  "label": "Geopolitical risk percentile",
+  "value": 93.0,
+  "unit": "pct",
+  "note": "30-day GPR vs 10 years"
+ },
+ {
+  "id": "core_cpi_3m",
+  "label": "Core CPI, 3-month annualized",
+  "value": 3.41,
+  "unit": "%",
+  "note": "September"
+ },
+ {
+  "id": "payrolls_3m",
+  "label": "Payrolls, 3-month average",
+  "value": 51.0,
+  "unit": "k",
+  "note": "September"
+ },
+ {
+  "id": "gscpi",
+  "label": "Supply-chain pressure",
+  "value": 1.28,
+  "unit": "sd",
+  "note": "NY Fed GSCPI, September"
+ }
+]

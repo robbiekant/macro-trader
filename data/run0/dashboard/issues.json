@@ -1,0 +1,74 @@
+[
+ {
+  "id": "P1",
+  "kind": "Risk engine",
+  "item": "bpr utilization target range",
+  "detail": "below target range: with defined-risk spreads the stress budget binds first (design note)",
+  "response": "Warning for the owner",
+  "severity": "warn"
+ },
+ {
+  "id": "P2",
+  "kind": "Risk engine",
+  "item": "event blackout ELECTION",
+  "detail": "entries are blocked until 2026-11-04 09:45 ET; tickets are staged for that date",
+  "response": "Final: blocks entry",
+  "severity": "block"
+ },
+ {
+  "id": "P3",
+  "kind": "Risk engine",
+  "item": "data option chains",
+  "detail": "all strikes and credits are model estimates",
+  "response": "Warning for the owner",
+  "severity": "warn"
+ },
+ {
+  "id": "P4",
+  "kind": "Risk engine",
+  "item": "min credit pct of width",
+  "detail": "USO, XSP and TLT spreads collect 10-12% of width at 8-20 delta; policy requires 20%, which implies about 25-delta strikes",
+  "response": "Policy conflict: owner decides (proposed: 10% for single spreads)",
+  "severity": "decision"
+ },
+ {
+  "id": "R1",
+  "kind": "Red team",
+  "item": "A ceasefire is the biggest single risk: OVX 57 implies roughly 16% monthly moves, and a de-escalation could gap USO down 25% in days.",
+  "detail": "Keep the USO spread at 10 delta, defined risk, max loss 1.2% of NAV.",
+  "response": "Accepted; sized to $11.7k max loss.",
+  "severity": "challenge"
+ },
+ {
+  "id": "R2",
+  "kind": "Red team",
+  "item": "In a risk-off crash the XSP put side, the EEM put side and the TLT call spread (bonds rally) all lose together.",
+  "detail": "Halve TLT or skip it; keep condor puts far out of the money.",
+  "response": "TLT capped at $6k max loss; condor puts at 8-14 delta.",
+  "severity": "challenge"
+ },
+ {
+  "id": "R3",
+  "kind": "Red team",
+  "item": "EEM momentum is negative (-8.6% in a month, below its 200-day average); a range trade fights the trend.",
+  "detail": "Small size, put side wide.",
+  "response": "Kept at $7.9k max loss; it is the only policy-compliant trade.",
+  "severity": "challenge"
+ },
+ {
+  "id": "R4",
+  "kind": "Red team",
+  "item": "Strikes and credits are model estimates: no live option chains in the current data plan.",
+  "detail": "Re-price every ticket on a live chain before approval.",
+  "response": "Every ticket is marked 'model estimate'.",
+  "severity": "challenge"
+ },
+ {
+  "id": "R5",
+  "kind": "Red team",
+  "item": "Election on Nov 3 and payrolls on Nov 6 sit inside the first week of every trade.",
+  "detail": "Enter after the election; enter XSP/TLT after payrolls or accept the event.",
+  "response": "Entries staged for Nov 4 or later.",
+  "severity": "challenge"
+ }
+]

@@ -1,0 +1,74 @@
+[
+ {
+  "sleeve": "US equity index",
+  "playbook_score": 0.065,
+  "after_modifiers": -0.435,
+  "direction": 0,
+  "conviction": 0.5,
+  "action": "XSP iron condor, puts at or below 12 delta, size x0.6",
+  "status": "Needs policy change"
+ },
+ {
+  "sleeve": "Intl developed equity",
+  "playbook_score": -0.012,
+  "after_modifiers": -0.512,
+  "direction": -1,
+  "conviction": 0.35,
+  "action": "Stand aside: no implied-vol data for EFA/FEZ",
+  "status": "No trade"
+ },
+ {
+  "sleeve": "EM equity",
+  "playbook_score": 0.429,
+  "after_modifiers": -0.071,
+  "direction": 0,
+  "conviction": 0.45,
+  "action": "EEM iron condor on rich EM premium",
+  "status": "Policy-compliant"
+ },
+ {
+  "sleeve": "Crude oil",
+  "playbook_score": 1.22,
+  "after_modifiers": 1.22,
+  "direction": 1,
+  "conviction": 0.55,
+  "action": "USO put spread, 10 delta, defined risk",
+  "status": "Needs policy change"
+ },
+ {
+  "sleeve": "Natural gas",
+  "playbook_score": 0.827,
+  "after_modifiers": 0.827,
+  "direction": 0,
+  "conviction": 0.3,
+  "action": "Stand aside: desk bearish, playbook bullish",
+  "status": "No trade"
+ },
+ {
+  "sleeve": "Gold",
+  "playbook_score": 1.434,
+  "after_modifiers": 1.434,
+  "direction": 0,
+  "conviction": 0.4,
+  "action": "Stand aside: falling on real yields; vol too cheap to sell",
+  "status": "No trade"
+ },
+ {
+  "sleeve": "Silver",
+  "playbook_score": 0.911,
+  "after_modifiers": 0.911,
+  "direction": 0,
+  "conviction": 0.3,
+  "action": "Stand aside: 58% off its high, spreads only",
+  "status": "No trade"
+ },
+ {
+  "sleeve": "Treasuries (TLT)",
+  "playbook_score": -1.143,
+  "after_modifiers": -1.143,
+  "direction": -1,
+  "conviction": 0.5,
+  "action": "TLT call spread at half size",
+  "status": "Needs policy change"
+ }
+]
