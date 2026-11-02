@@ -1,309 +1,569 @@
 <meta name="dash-one-writer">
 <style>
   .ic { display: grid; gap: var(--cds-gap-xl); font-family: var(--font-anthropic-sans); }
-  .ic-head { display: grid; gap: var(--cds-gap-sm); }
-  .ic-title { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
-  .ic-take { font-size: var(--cds-font-size-body); color: var(--color-fg); margin: 0; max-width: 72ch; }
-  .ic .ic-take b, .ic .tile b { font-weight: 600; font-variant-numeric: tabular-nums; }
-  .ic-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
-  .ic-chip { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); border: 1px solid var(--color-border-line); border-radius: 999px; padding: 2px 10px; }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); gap: var(--cds-gap-md); }
-  .tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); display: grid; gap: var(--cds-gap-xs); align-content: start; }
-  .tile .lab { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
-  .ic .tile .val { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; }
-  .tile .note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ic h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+  .ic h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .ic h3 { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .ic p { margin: 0; }
+  .ic .take { max-width: 76ch; line-height: 1.55; }
+  .ic .take b, .ic .tile b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .muted { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); }
+  .chip { font-size: var(--cds-font-size-caption); border: 1px solid var(--color-border-line); border-radius: 999px; padding: 2px 10px; color: var(--color-fg-muted); }
   .sec { display: grid; gap: var(--cds-gap-md); }
-  .sec h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
-  .sec > p { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); max-width: 80ch; }
-  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+  .sec > .muted { max-width: 84ch; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-md); }
+  .tile { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); display: grid; gap: 4px; align-content: start; }
+  .tile .lab { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ic .tile .val { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); }
+  .spark { height: 34px; min-height: 34px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr)); gap: var(--cds-gap-md); }
   .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); display: grid; gap: var(--cds-gap-sm); align-content: start; min-width: 0; }
-  .card h3 { font-size: var(--cds-font-size-body); font-weight: var(--cds-font-weight-medium); margin: 0; }
-  .card .sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; }
-  .chart { position: relative; min-height: 180px; }
-  .tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; }
+  .chart { position: relative; min-height: 220px; }
+  .chart.tall { min-height: 300px; }
+  .chart.short { min-height: 150px; }
+  .tip { position: absolute; z-index: 3; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; opacity: 0; }
   .tip .k { color: var(--cds-text-secondary); }
-  .agents { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: var(--cds-gap-md); }
-  .agent { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); display: grid; gap: var(--cds-gap-xs); align-content: start; min-width: 0; }
-  .agent .top { display: flex; justify-content: space-between; gap: var(--cds-gap-sm); align-items: baseline; }
-  .agent .nm { font-weight: var(--cds-font-weight-medium); }
-  .agent .meta, .agent .st { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
-  .agent .st.ok { color: var(--color-ok); }
-  .agent .st.warn { color: var(--color-warn); }
-  .agent .stance { font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
-  .agent p { margin: 0; font-size: var(--cds-font-size-caption); line-height: 1.5; }
-  .agent ul { margin: 0; padding-left: 1.1em; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: grid; gap: 2px; }
+  .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .legend span { display: inline-flex; align-items: center; }
+  .flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 40px; }
+  .node { font-size: var(--cds-font-size-caption); border-radius: 999px; padding: 4px 10px; border: 1px solid var(--color-border-line); display: inline-flex; gap: 6px; align-items: center; background: var(--color-panel); }
+  .node i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .arrow { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .desks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+  .desk { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md); display: grid; gap: var(--cds-gap-sm); align-content: start; min-width: 0; border-top-width: 4px; }
+  .desk .hd { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .desk .nm { font-weight: var(--cds-font-weight-medium); }
+  .desk .st { font-size: var(--cds-font-size-caption); color: var(--color-ok); white-space: nowrap; }
+  .desk .meters { display: grid; grid-template-columns: 120px 64px 1fr; gap: 10px; align-items: center; }
+  .desk .lbl { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.35; }
+  .desk .lbl strong { color: var(--color-fg); font-weight: 600; display: block; }
+  .desk .mini { position: relative; min-height: 130px; }
+  .desk p { font-size: var(--cds-font-size-caption); line-height: 1.5; }
+  .desk ul { margin: 0; padding-left: 1.1em; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: grid; gap: 2px; }
+  .payoffs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--cds-gap-md); }
+  .pay { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-sm); display: grid; gap: 4px; position: relative; min-width: 0; }
+  .pay .hd { display: flex; justify-content: space-between; gap: 8px; font-size: var(--cds-font-size-caption); }
+  .pay .ok { color: var(--color-ok); } .pay .no { color: var(--color-bad); }
   .tbox { overflow: auto; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); }
-  .tbox.tall { max-height: 26rem; }
+  .tbox.tall { max-height: 24rem; }
   .ic table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
   .ic th, .ic td { text-align: left; padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
   .ic th { position: sticky; top: 0; background: var(--color-panel); color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); white-space: nowrap; }
   .ic td.n, .ic th.n { text-align: right; }
-  .pos { color: var(--color-ok); }
-  .neg { color: var(--color-bad); }
-  .warnc { color: var(--color-warn); }
+  .pos { color: var(--color-ok); } .neg { color: var(--color-bad); } .warn { color: var(--color-warn); }
   [data-dash-source-state=empty] { color: transparent; }
   [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+  @media (prefers-reduced-motion: no-preference) {
+    .grow { animation: grow var(--cds-dur-slow) var(--cds-ease-out) both; transform-box: fill-box; transform-origin: left center; }
+    @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  }
 </style>
 
 <div class="ic">
-  <header class="ic-head">
-    <h1 class="ic-title" id="top">Macro Trader Weekly IC · week of Nov 2, 2026</h1>
-    <p class="ic-take">Reflation (<b data-draw="regime-word" data-source="regime" data-field="final" data-where="regime=Reflation">—</b>) and stagflation (<b data-draw="regime-word" data-source="regime" data-field="final" data-where="regime=Stagflation">—</b>) are nearly tied as a war-driven oil shock meets a Fed that is still hiking. <b data-draw="count" data-source="ticket_counts" data-field="current">—</b> trade qualifies under the current risk policy and <b data-draw="count" data-source="ticket_counts" data-field="proposed">—</b> qualify if you lower the minimum-credit rule; no entries before the Nov 3 election.</p>
-    <div class="ic-chips"><span class="ic-chip">Run 0 · manual first run in one Claude Code session</span><span class="ic-chip">Paper mode</span><span class="ic-chip">Data as of Oct 30 – Nov 2, 2026</span><span class="ic-chip">Strikes are model estimates</span></div>
+  <header class="sec" id="top">
+    <h1>Macro Trader Weekly IC · week of Nov 2, 2026</h1>
+    <p class="take">Reflation (<b data-draw="regime-word" data-source="regime" data-field="final" data-where="regime=Reflation">—</b>) and stagflation (<b data-draw="regime-word" data-source="regime" data-field="final" data-where="regime=Stagflation">—</b>) are nearly tied as a war-driven oil shock meets a Fed that is still hiking. Re-priced on live Interactive Brokers quotes, <b data-draw="count" data-source="ticket_counts" data-field="pass10">—</b> of <b data-draw="count" data-source="ticket_counts" data-field="total">—</b> candidate trades passes every check right now (enough credit, tight quotes, delta inside its cap). The best, a USO put spread, pays enough but its quotes are too wide before the open. Nothing can be entered before the Nov 3 election.</p>
+    <div class="chips"><span class="chip">Run 0 · manual first run</span><span class="chip">Paper mode</span><span class="chip">Option quotes: Interactive Brokers, pre-market Nov 2</span><span class="chip">Macro data: FRED, EIA, NY Fed, GPR, Massive</span></div>
+    <div class="tiles">
+      <div class="tile"><span class="lab">Fed funds, the hurdle</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=hurdle">—</b><div class="spark" data-draw="spark" data-series="fed_funds" data-source="series"></div></div>
+      <div class="tile"><span class="lab">WTI crude</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=wti">—</b><div class="spark" data-draw="spark" data-series="wti" data-source="series"></div></div>
+      <div class="tile"><span class="lab">2-year minus Fed funds</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=t2y_minus_ff">—</b><div class="spark" data-draw="spark" data-series="t2y" data-source="series"></div></div>
+      <div class="tile"><span class="lab">US Shiller CAPE</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=cape">—</b><div class="spark" data-draw="spark" data-series="cape" data-source="series"></div></div>
+      <div class="tile"><span class="lab">VIX</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=vix">—</b><div class="spark" data-draw="spark" data-series="vix" data-source="series"></div></div>
+      <div class="tile"><span class="lab">Net liquidity, 13-week change ($bn)</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=net_liq_13w">—</b><div class="spark" data-draw="spark" data-series="net_liquidity" data-source="series"></div></div>
+    </div>
   </header>
 
-  <section class="sec" id="headline">
-    <div class="tiles">
-      <div class="tile"><span class="lab">Fed funds (the hurdle)</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=hurdle">—</b><span class="note">Collateral earns about this</span></div>
-      <div class="tile"><span class="lab">WTI crude</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=wti">—</b><span class="note">Brent <b data-draw="kpi" data-source="kpi" data-field="value" data-where="id=brent">—</b></span></div>
-      <div class="tile"><span class="lab">2-year minus Fed funds</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=t2y_minus_ff">—</b><span class="note">More hikes priced</span></div>
-      <div class="tile"><span class="lab">US Shiller CAPE</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=cape">—</b><span class="note">Near the 1999 dot-com peak</span></div>
-      <div class="tile"><span class="lab">VIX</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=vix">—</b><span class="note">Equity vol, mid-range</span></div>
-      <div class="tile"><span class="lab">US net liquidity, 13 weeks</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=net_liq_13w">—</b><span class="note">Fed assets − TGA − reverse repo</span></div>
-    </div>
+  <section class="sec" id="pipeline">
+    <h2>Who ran this week</h2>
+    <p class="muted">Green ran, amber is waiting on you, grey has not run yet. Every desk's numbers were checked against stored data.</p>
+    <div class="card"><div class="flow" data-draw="flow" data-source="agents"></div></div>
   </section>
 
   <section class="sec" id="regime">
     <h2>Regime</h2>
-    <p>Code turns the growth and inflation scores into four probabilities (prior). The Regime Strategist may move each by a bounded amount, citing evidence (final).</p>
-    <div class="grid2">
-      <div class="card"><h3>Regime probabilities</h3><p class="sub">Prior from code vs final after the strategist's adjustment, %</p>
-        <div class="chart" data-draw="regime-chart" data-source="regime"></div></div>
-      <div class="card"><h3>Macro readings behind it</h3><p class="sub">Latest stored values</p>
-        <div class="tiles">
-          <div class="tile"><span class="lab">Core CPI, 3-month annualized</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=core_cpi_3m">—</b></div>
-          <div class="tile"><span class="lab">Payrolls, 3-month average</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=payrolls_3m">—</b></div>
-          <div class="tile"><span class="lab">10-year real yield</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=real_10y">—</b></div>
-          <div class="tile"><span class="lab">Geopolitical risk, 30-day vs 10 years</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=gpr_pctile">—</b></div>
-          <div class="tile"><span class="lab">Supply-chain pressure (GSCPI)</span><b class="val" data-draw="kpi" data-source="kpi" data-field="value" data-where="id=gscpi">—</b></div>
-        </div></div>
+    <p class="muted">Growth and inflation scores place the economy on a map; the winding line is its path over the last 18 months. Code sets the prior; the Regime Strategist may adjust it a bounded amount.</p>
+    <div class="grid">
+      <div class="card"><h3>Where the economy is heading</h3><p class="muted">Growth score (across) vs inflation score (up), monthly</p><div class="chart tall" data-draw="quadrant" data-source="regime_path"></div></div>
+      <div class="card"><h3>Regime probabilities</h3><p class="muted">Final, after the strategist's adjustment</p><div class="chart" data-draw="regime-donut" data-source="regime"></div></div>
+      <div class="card"><h3>Prior vs final</h3><p class="muted">Code's prior and the final call, %</p><div class="chart short" data-draw="regime-bars" data-source="regime"></div></div>
     </div>
   </section>
 
-  <section class="sec" id="agents">
-    <h2>What each agent did this week</h2>
-    <p>Every Claude desk returned a typed report; code checked each cited number against the stored data. Stance is negative for bearish or contracting and positive for bullish or expanding.</p>
-    <div class="agents" data-draw="agents" data-source="agents"></div>
+  <section class="sec" id="desks">
+    <h2>What each research desk concluded</h2>
+    <p class="muted">Each card: the desk's stance (gauge, bearish left to bullish right), its confidence (ring), its key chart, and its findings. The colored bar on top follows the stance.</p>
+    <div class="desks" data-draw="desks" data-source="agents series"></div>
   </section>
 
   <section class="sec" id="sleeves">
     <h2>Committee decisions by asset class</h2>
-    <p>Playbook score is the probability-weighted regime playbook; the liquidity modifier lowers the equity sleeves because liquidity is draining. A large enough score takes a side; otherwise the sleeve is neutral.</p>
+    <p class="muted">Probability-weighted playbook score before and after the liquidity modifier. Beyond the dashed lines a sleeve takes a side.</p>
+    <div class="grid">
+      <div class="card"><h3>Score by asset class</h3><div class="legend"><span><i class="sw" style="background: var(--cds-chart-muted)"></i>Playbook</span><span><i class="sw" data-draw="sw0"></i>After modifiers</span></div><div class="chart" data-draw="sleeve-bars" data-source="sleeves"></div></div>
+      <div class="card"><h3>Risk budget by sleeve</h3><p class="muted">Share of the stress-loss budget, from the risk policy</p><div class="chart" data-draw="budget-donut" data-source="budget"></div></div>
+    </div>
     <div class="tbox"><table data-source="sleeves" data-row-key="sleeve">
-      <thead><tr><th data-field="sleeve">Asset class</th><th class="n" data-field="playbook_score">Playbook</th><th class="n" data-field="after_modifiers">After modifiers</th><th class="n" data-field="direction">Direction</th><th class="n" data-field="conviction">Conviction</th><th data-field="action">Action</th><th data-field="status">Status</th></tr></thead>
+      <thead><tr><th data-field="sleeve">Asset class</th><th class="n" data-field="playbook_score">Playbook</th><th class="n" data-field="after_modifiers">After modifiers</th><th class="n" data-field="conviction">Conviction</th><th data-field="action">Action</th><th data-field="status">Status</th></tr></thead>
       <tbody data-draw="sleeves-body"></tbody></table></div>
   </section>
 
   <section class="sec" id="trades">
-    <h2>Proposed trades (paper, December 18 expiry)</h2>
-    <p>Defined-risk spreads only. Strikes and credits are Black–Scholes estimates from stored implied-vol indices because the current data plan has no option chains; re-price on a live chain before approving.</p>
-    <div class="tbox"><table data-source="tickets" data-row-key="book,id">
-      <thead><tr><th data-field="book">Book</th><th data-field="id">Ticket</th><th data-field="instrument">Underlying</th><th data-field="structure">Structure</th><th data-field="legs">Legs</th><th class="n" data-field="quantity">Qty</th><th class="n" data-field="credit_total">Credit</th><th class="n" data-field="max_loss_total">Max loss</th><th class="n" data-field="credit_pct_width">Credit % width</th><th class="n" data-field="return_on_risk_pct">Return on risk</th><th data-field="status">Status</th></tr></thead>
+    <h2>Trades on live IBKR quotes (December 18 expiry)</h2>
+    <p class="muted">The model's estimate against the real market. Real put skew makes far out-of-the-money index spreads pay less than the model expected. Before the open, some quotes are too wide to trade.</p>
+    <div class="grid">
+      <div class="card"><h3>Credit as % of width</h3><div class="legend"><span><i class="sw" style="background: var(--cds-chart-muted)"></i>Model estimate</span><span><i class="sw" data-draw="sw1"></i>IBKR market</span><span>Dashed: 10% and 20% rules</span></div><div class="chart" data-draw="credit-bars" data-source="tickets"></div></div>
+      <div class="card"><h3>Implied vs realized volatility (IBKR)</h3><p class="muted">Implied vol, 30-day realized vol, and implied-vol rank over 52 weeks</p><div class="chart" data-draw="iv-bars" data-source="ivs"></div></div>
+    </div>
+    <div class="card"><h3>Profit and loss at expiry, per contract</h3><p class="muted">Green is profit, red is loss; the dotted line is today's price</p><div class="payoffs" data-draw="payoffs" data-source="tickets"></div></div>
+    <div class="tbox"><table data-source="tickets" data-row-key="id">
+      <thead><tr><th data-field="id">Ticket</th><th data-field="instrument">Underlying</th><th data-field="legs">Legs</th><th data-field="short_deltas">Short delta</th><th class="n" data-field="ibkr_credit_pct">Credit % width</th><th class="n" data-field="quantity">Qty</th><th class="n" data-field="credit_total">Credit</th><th class="n" data-field="max_loss_total">Max loss</th><th data-field="passes_10pct">Passes checks</th><th data-field="issues">Issues</th></tr></thead>
       <tbody data-draw="tickets-body"></tbody></table></div>
   </section>
 
   <section class="sec" id="checks">
-    <h2>Risk engine and red team</h2>
-    <p>Risk-engine blocks are final. The red team argued against the plan in a separate context; the CIO answered each challenge.</p>
-    <div class="tbox"><table data-source="issues" data-row-key="id">
-      <thead><tr><th data-field="id">#</th><th data-field="kind">From</th><th data-field="item">Item</th><th data-field="detail">Detail or fix</th><th data-field="response">Outcome</th></tr></thead>
-      <tbody data-draw="issues-body"></tbody></table></div>
+    <h2>Risk engine, IBKR re-price and red team</h2>
+    <div class="grid">
+      <div class="card"><h3>Check outcomes</h3><p class="muted">Every check this week</p><div class="chart" data-draw="checks-donut" data-source="checks"></div></div>
+      <div class="card"><h3>Red team challenges</h3><p class="muted">Each was answered by the CIO</p><div data-draw="redteam" data-source="checks"></div></div>
+    </div>
+    <div class="tbox tall"><table data-source="checks" data-row-key="id">
+      <thead><tr><th data-field="id">#</th><th data-field="kind">From</th><th data-field="item">Check</th><th data-field="detail">Detail</th><th data-field="outcome">Outcome</th></tr></thead>
+      <tbody data-draw="checks-body"></tbody></table></div>
   </section>
 
   <section class="sec" id="markets">
     <h2>Markets</h2>
-    <div class="grid2">
-      <div class="card"><h3>Volatility premium</h3><p class="sub">Implied vol index minus 20-day realized vol, points. Higher means richer premium to sell.</p>
-        <div class="chart" data-draw="vol-chart" data-source="etfs"></div></div>
-      <div class="card"><h3>Tradable ETFs</h3><p class="sub">Returns %, distance from 200-day average %, 20-day realized vol %</p>
-        <div class="tbox tall"><table data-source="etfs" data-row-key="ticker">
-          <thead><tr><th data-field="ticker">ETF</th><th class="n" data-field="close">Close</th><th class="n" data-field="ret_1m">1m</th><th class="n" data-field="ret_3m">3m</th><th class="n" data-field="ret_12m">12m</th><th class="n" data-field="vs_200dma">vs 200d</th><th class="n" data-field="drawdown_52w">From high</th><th class="n" data-field="rv20">RV20</th></tr></thead>
-          <tbody data-draw="etfs-body"></tbody></table></div></div>
+    <div class="grid">
+      <div class="card"><h3>ETF returns heatmap</h3><p class="muted">Returns over 1, 3 and 12 months and distance from the 200-day average, %</p><div class="chart tall" data-draw="heat" data-source="etfs"></div></div>
+      <div class="card"><h3>One year, rebased to 100</h3><p class="muted">Oil and energy against stocks, gold and bonds</p><div class="chart tall" data-draw="rebased" data-source="series"></div></div>
     </div>
   </section>
 
   <section class="sec" id="data">
-    <h2>Data used and provenance</h2>
-    <p>Every series the agents read, with its last observation and the hash of the stored payload. News items are archived documents cited by the desks.</p>
-    <div class="tbox tall"><table data-source="provenance" data-row-key="id">
-      <thead><tr><th data-field="id">Source id</th><th data-field="kind">Kind</th><th data-field="last_obs">Last observation</th><th class="n" data-field="age_days">Age (days)</th><th data-field="detail">Detail</th></tr></thead>
-      <tbody data-draw="provenance-body"></tbody></table></div>
+    <h2>Data used</h2>
+    <div class="grid">
+      <div class="card"><h3>Stored sources by kind</h3><div class="chart short" data-draw="source-donut" data-source="provenance"></div></div>
+      <div class="card"><h3>Every source</h3><div class="tbox tall"><table data-source="provenance" data-row-key="id">
+        <thead><tr><th data-field="id">Source id</th><th data-field="kind">Kind</th><th data-field="last_obs">Last observation</th><th class="n" data-field="age_days">Age (days)</th><th data-field="detail">Detail</th></tr></thead>
+        <tbody data-draw="provenance-body"></tbody></table></div></div>
+    </div>
   </section>
 </div>
 
 <script>
   dash.calc('ticket_counts', {
-    inputs: ['tickets'],
-    title: 'Trades per book',
-    description: 'Counts the proposed tickets under the current policy and under the proposed minimum-credit change.',
-    fn: (tickets) => [{
-      current: tickets.filter((t) => t.book === 'Current policy').length,
-      proposed: tickets.filter((t) => t.book !== 'Current policy').length,
-    }],
+    inputs: ['tickets'], title: 'Candidate trades passing the credit rules',
+    description: 'Counts candidates re-priced on IBKR quotes and how many pay at least 10% of width.',
+    fn: (tickets) => [{ total: tickets.length, pass10: tickets.filter((t) => t.passes_10pct === 'yes').length }],
   });
 
+  // ---------------------------------------------------------------- helpers
   const num = (v) => (v === null || v === undefined || v === '' ? null : Number(v));
   const f1 = d3.format('.1f'), f2 = d3.format('.2f'), money = d3.format('$,.0f'), comma = d3.format(',');
-  const signed = (v, digits = 1) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(digits);
+  const signed = (v, n = 1) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(n);
+  const parse = (s) => new Date(s.length === 7 ? s + '-01T00:00:00Z' : s + 'T00:00:00Z');
+  const C = (i) => dash.colors[i % dash.colors.length];
+  const css = (el, name, fallback) => getComputedStyle(el).getPropertyValue(name).trim() || fallback;
   const where = (el) => Object.fromEntries((el.dataset.where || '').split('&').filter(Boolean).map((p) => p.split('=').map(decodeURIComponent)));
   const pick = (rows, el) => { const w = where(el); return rows.find((r) => Object.entries(w).every(([k, v]) => String(r[k]) === v)); };
-  const fmtKpi = (r) => {
-    const v = num(r.value);
-    switch (r.unit) {
-      case '%': return f2(v) + '%';
-      case '$': return '$' + f2(v);
-      case 'bp': return signed(v, 0) + ' bp';
-      case '$bn': return signed(v, 0).replace(/^([+−])/, '$1$') + 'bn';
-      case 'x': return f1(v) + '×';
-      case 'pct': return f1(v).replace('.0', '') + 'th pct';
-      case 'k': return comma(v) + 'k';
-      case 'sd': return f2(v);
-      default: return f1(v);
-    }
+  const ready = (el, ids) => {
+    const st = ids.map((id) => dash.data(id).status);
+    el.classList.toggle('dash-skeleton', st.includes('loading'));
+    return st.every((s) => s === 'ok');
   };
+  const seriesRows = (id) => dash.data('series').data.filter((r) => r.series === id).map((r) => ({ d: parse(r.date), v: num(r.value), label: r.label }));
+  const svgIn = (el, h) => { el.replaceChildren(); const w = Math.max(200, el.clientWidth); const s = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`); return [s, w]; };
+  const tipIn = (el) => d3.select(el).append('div').attr('class', 'tip');
+  const showTip = (tip, el, ev, lines) => {
+    const [mx, my] = d3.pointer(ev, el);
+    tip.html('');
+    lines.forEach((l, i) => { const d = tip.append('div'); if (i === 0) d.attr('class', 'k'); if (l.c) d.append('i').attr('class', 'sw').style('background', l.c); d.append('span').text(l.t ?? l); });
+    const tw = tip.node().offsetWidth;
+    tip.style('opacity', 1).style('left', Math.max(0, Math.min(mx + 12, el.clientWidth - tw - 4)) + 'px').style('top', Math.max(0, my - 40) + 'px');
+  };
+  const axisStyle = (g) => { g.attr('font-size', null).attr('font-family', null); g.selectAll('text').attr('fill', 'var(--color-fg-muted)').style('font-size', 'var(--cds-font-size-caption)'); g.selectAll('line,path').attr('stroke', 'var(--cds-chart-axis)'); };
+  const textW = (svg, t, size = 11) => { const n = svg.append('text').attr('font-size', size).text(t); const w = n.node().getComputedTextLength(); n.remove(); return w; };
+  const stanceColor = (v) => (v === null ? 'var(--cds-chart-muted)' : v > 0.25 ? 'var(--color-ok)' : v < -0.25 ? 'var(--color-bad)' : 'var(--color-warn)');
 
-  dash.draw('kpi', (el) => {
-    const d = dash.data('kpi');
-    if (d.status !== 'ok') { el.textContent = '—'; el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
-    el.classList.remove('dash-skeleton');
-    const r = pick(d.data, el);
-    el.textContent = r ? fmtKpi(r) : '—';
-  });
-
-  dash.draw('regime-word', (el) => {
-    const d = dash.data('regime');
-    const r = d.status === 'ok' ? pick(d.data, el) : null;
-    el.textContent = r ? f1(num(r.final)) + '%' : '—';
-  });
-
-  dash.draw('count', (el) => {
-    const d = dash.data('ticket_counts');
-    const r = d.status === 'ok' ? d.data[0] : null;
-    el.textContent = r ? String(r[el.dataset.field]) : '—';
-  });
-
-  function hbars(el, rows, series, opts) {
-    // rows: [{label, values:[...]}], series: [{name, color}]
-    el.replaceChildren();
-    const width = Math.max(260, el.clientWidth);
-    const rowH = opts.rowH || 34, barH = Math.min(14, (rowH - 8) / series.length);
-    const svg = d3.select(el).append('svg').attr('width', '100%');
-    const probe = svg.append('text').attr('font-size', 12).style('font-family', 'var(--font-anthropic-sans)');
-    const labW = d3.max(rows, (r) => { probe.text(r.label); return probe.node().getComputedTextLength(); }) + 12;
-    probe.text(opts.fmt(d3.max(rows, (r) => d3.max(r.values)))); const valW = probe.node().getComputedTextLength() + 10;
-    probe.remove();
-    const top = series.length > 1 ? 22 : 4, h = top + rows.length * rowH + 4;
-    svg.attr('viewBox', `0 0 ${width} ${h}`);
-    const lo = Math.min(0, d3.min(rows, (r) => d3.min(r.values))), hi = Math.max(0, d3.max(rows, (r) => d3.max(r.values)));
-    const x = d3.scaleLinear([lo, hi], [labW, width - valW]);
-    if (series.length > 1) {
-      const lg = svg.append('g').attr('transform', `translate(${labW},12)`);
-      let off = 0;
-      series.forEach((s) => {
-        lg.append('rect').attr('x', off).attr('y', -8).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', s.color);
-        const t = lg.append('text').attr('x', off + 14).attr('y', 1).attr('font-size', 12).attr('fill', 'var(--color-fg-muted)').text(s.name);
-        off += 14 + t.node().getComputedTextLength() + 16;
-      });
+  function lineChart(el, specs, o = {}) {
+    const h = o.height || 220;
+    const [svg, W] = svgIn(el, h);
+    const data = specs.map((s, i) => ({ ...s, color: s.color || C(i), pts: s.pts || seriesRows(s.series) })).filter((s) => s.pts.length);
+    if (!data.length) return;
+    const all = data.flatMap((s) => s.pts);
+    const yExt = d3.extent(all, (p) => p.v);
+    if (o.refs) o.refs.forEach((r) => { yExt[0] = Math.min(yExt[0], r.y); yExt[1] = Math.max(yExt[1], r.y); });
+    const y = d3.scaleLinear(yExt, [h - 22, 10]).nice();
+    const fmtY = o.fmt || ((v) => d3.format('~s')(v));
+    const left = d3.max(y.ticks(4), (t) => textW(svg, fmtY(t))) + 8;
+    const right = o.endLabels === false ? 8 : d3.max(data, (s) => textW(svg, `${s.short || s.label} ${fmtY(s.pts[s.pts.length - 1].v)}`)) + 12;
+    const x = d3.scaleUtc(d3.extent(all, (p) => p.d), [left, Math.max(left + 60, W - right)]);
+    svg.append('g').selectAll('line').data(y.ticks(4)).join('line').attr('x1', left).attr('x2', x.range()[1]).attr('y1', y).attr('y2', y).attr('stroke', 'var(--cds-chart-grid)');
+    svg.append('g').attr('transform', `translate(${left},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(fmtY).tickSize(0)).call(axisStyle).call((g) => g.select('.domain').remove());
+    svg.append('g').attr('transform', `translate(0,${h - 22})`).call(d3.axisBottom(x).ticks(Math.max(2, Math.floor((x.range()[1] - left) / 90))).tickSizeOuter(0)).call(axisStyle);
+    (o.refs || []).forEach((r) => {
+      svg.append('line').attr('x1', left).attr('x2', x.range()[1]).attr('y1', y(r.y)).attr('y2', y(r.y)).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 4');
+    });
+    const curve = o.snake ? d3.curveCatmullRom.alpha(0.5) : d3.curveLinear;
+    data.forEach((s, i) => {
+      if (o.area && i === 0) {
+        const id = 'g' + Math.random().toString(36).slice(2);
+        const gr = svg.append('defs').append('linearGradient').attr('id', id).attr('x1', 0).attr('x2', 0).attr('y1', 0).attr('y2', 1);
+        [[0, .26], [.25, .16], [.5, .08], [.75, .03], [1, 0]].forEach(([o2, a]) => gr.append('stop').attr('offset', o2).attr('style', `stop-color:${s.color};stop-opacity:${a}`));
+        svg.append('path').datum(s.pts).attr('fill', `url(#${id})`).attr('d', d3.area().curve(curve).x((p) => x(p.d)).y0(y.range()[0]).y1((p) => y(p.v)));
+      }
+      svg.append('path').datum(s.pts).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', s.width || 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round')
+        .attr('d', d3.line().curve(curve).x((p) => x(p.d)).y((p) => y(p.v)));
+      const lp = s.pts[s.pts.length - 1];
+      svg.append('circle').attr('cx', x(lp.d)).attr('cy', y(lp.v)).attr('r', 3).attr('fill', s.color);
+      if (o.endLabels !== false) {
+        s._ly = y(lp.v);
+      }
+    });
+    if (o.endLabels !== false) {
+      const sorted = [...data].sort((a, b) => a._ly - b._ly);
+      let prev = -Infinity;
+      sorted.forEach((s) => { s._ly = Math.max(s._ly, prev + 12); prev = s._ly; });
+      sorted.forEach((s) => svg.append('text').attr('x', x.range()[1] + 6).attr('y', s._ly + 4).attr('font-size', 11).attr('fill', s.color)
+        .text(`${s.short || s.label} ${fmtY(s.pts[s.pts.length - 1].v)}`));
     }
-    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', top).attr('y2', h - 4).attr('stroke', 'var(--cds-chart-axis)');
-    const tip = d3.select(el).append('div').attr('class', 'tip').style('opacity', 0);
+    (o.points || []).forEach((p) => {
+      svg.append('circle').attr('cx', x(p.d)).attr('cy', y(p.v)).attr('r', 5).attr('fill', p.color || 'var(--color-bad)').attr('stroke', 'var(--color-panel)').attr('stroke-width', 2);
+      svg.append('text').attr('x', x(p.d) - 6).attr('y', y(p.v) - 9).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', p.color || 'var(--color-bad)').text(p.label);
+    });
+    const tip = tipIn(el), rule = svg.append('line').attr('y1', 10).attr('y2', h - 22).attr('stroke', 'var(--cds-chart-axis)').style('opacity', 0);
+    const bis = d3.bisector((p) => p.d).center;
+    svg.append('rect').attr('x', left).attr('y', 0).attr('width', Math.max(0, x.range()[1] - left)).attr('height', h).attr('fill', 'transparent')
+      .on('mousemove', (ev) => {
+        const dt = x.invert(d3.pointer(ev)[0]);
+        rule.attr('x1', x(dt)).attr('x2', x(dt)).style('opacity', 1);
+        showTip(tip, el, ev, [d3.utcFormat('%b %-d, %Y')(dt), ...data.map((s) => { const p = s.pts[bis(s.pts, dt)]; return { c: s.color, t: `${s.short || s.label}: ${fmtY(p.v)}` }; })]);
+      }).on('mouseleave', () => { tip.style('opacity', 0); rule.style('opacity', 0); });
+  }
+
+  function donut(el, rows, o = {}) {
+    el.replaceChildren();
+    const wrap = d3.select(el).append('div').style('display', 'grid').style('grid-template-columns', 'minmax(140px, 200px) 1fr').style('gap', '12px').style('align-items', 'center');
+    const size = 180, r = size / 2;
+    const svg = wrap.append('svg').attr('width', '100%').attr('viewBox', `0 0 ${size} ${size}`);
+    const g = svg.append('g').attr('transform', `translate(${r},${r})`);
+    const pie = d3.pie().sort(null).value((d) => d.value).padAngle(0.015);
+    const arc = d3.arc().innerRadius(r * 0.58).outerRadius(r - 2).cornerRadius(3);
+    const tip = tipIn(el);
+    g.selectAll('path').data(pie(rows)).join('path').attr('d', arc).attr('fill', (d) => d.data.color)
+      .on('mousemove', (ev, d) => showTip(tip, el, ev, [d.data.label, { c: d.data.color, t: o.fmt ? o.fmt(d.data.value) : String(d.data.value) }]))
+      .on('mouseleave', () => tip.style('opacity', 0));
+    if (o.center) {
+      g.append('text').attr('text-anchor', 'middle').attr('y', 2).attr('font-size', 22).style('font-family', 'var(--font-anthropic-serif)').attr('fill', 'var(--color-fg)').text(o.center);
+      if (o.sub) g.append('text').attr('text-anchor', 'middle').attr('y', 20).attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(o.sub);
+    }
+    const lg = wrap.append('div').style('display', 'grid').style('gap', '6px');
+    rows.forEach((d) => { const it = lg.append('div').style('font-size', 'var(--cds-font-size-caption)').style('display', 'flex').style('align-items', 'center');
+      it.append('i').attr('class', 'sw').style('background', d.color); it.append('span').text(`${d.label} · ${o.fmt ? o.fmt(d.value) : d.value}`); });
+  }
+
+  function hbars(el, rows, series, o = {}) {
+    const rowH = o.rowH || 30, top = 6, h = top + rows.length * rowH + 22;
+    const [svg, W] = svgIn(el, h);
+    const fmt = o.fmt || ((v) => f1(v));
+    const labW = d3.max(rows, (r) => textW(svg, r.label, 12)) + 10;
+    const vals = rows.flatMap((r) => r.values.filter((v) => v !== null));
+    const refs = o.refs || [];
+    const lo = Math.min(0, d3.min(vals), ...refs), hi = Math.max(0, d3.max(vals), ...refs);
+    const valW = textW(svg, fmt(hi)) + 10;
+    const x = d3.scaleLinear([lo, hi], [labW, W - valW]).nice();
+    const bh = Math.min(12, (rowH - 8) / series.length);
+    svg.append('g').attr('transform', `translate(0,${h - 20})`).call(d3.axisBottom(x).ticks(4).tickFormat(fmt).tickSizeOuter(0)).call(axisStyle);
+    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', top).attr('y2', h - 20).attr('stroke', 'var(--cds-chart-axis)');
+    refs.forEach((rv) => svg.append('line').attr('x1', x(rv)).attr('x2', x(rv)).attr('y1', top).attr('y2', h - 20).attr('stroke', 'var(--cds-chart-reference)').attr('stroke-dasharray', '4 4'));
+    const tip = tipIn(el);
     rows.forEach((r, i) => {
       const y0 = top + i * rowH;
       svg.append('text').attr('x', 0).attr('y', y0 + rowH / 2 + 4).attr('font-size', 12).attr('fill', 'var(--color-fg)').text(r.label);
       r.values.forEach((v, j) => {
-        const y = y0 + (rowH - barH * series.length) / 2 + j * barH;
-        const rect = svg.append('rect').attr('x', Math.min(x(0), x(v))).attr('y', y).attr('height', barH - 2)
-          .attr('width', Math.max(1, Math.abs(x(v) - x(0)))).attr('rx', 2).attr('fill', series[j].color);
-        svg.append('text').attr('x', Math.max(x(0), x(v)) + 4).attr('y', y + barH - 4).attr('font-size', 11)
-          .attr('fill', 'var(--color-fg-muted)').text(opts.fmt(v));
-        rect.on('mousemove', (ev) => {
-          const [mx, my] = d3.pointer(ev, el);
-          tip.style('opacity', 1).style('left', Math.min(mx + 10, el.clientWidth - 160) + 'px').style('top', (my - 30) + 'px')
-            .html('');
-          tip.append('div').attr('class', 'k').text(r.label);
-          tip.append('div').text(`${series[j].name}: ${opts.fmt(v)}`);
-        }).on('mouseleave', () => tip.style('opacity', 0));
+        if (v === null) return;
+        const yy = y0 + (rowH - bh * series.length) / 2 + j * bh;
+        const col = typeof series[j].color === 'function' ? series[j].color(v, r) : series[j].color;
+        svg.append('rect').attr('class', 'grow').attr('x', Math.min(x(0), x(v))).attr('y', yy).attr('height', bh - 2).attr('width', Math.max(1, Math.abs(x(v) - x(0)))).attr('rx', 2).attr('fill', col)
+          .on('mousemove', (ev) => showTip(tip, el, ev, [r.label, { c: col, t: `${series[j].name}: ${fmt(v)}` }])).on('mouseleave', () => tip.style('opacity', 0));
+        if (j === r.values.length - 1 || o.allLabels) svg.append('text').attr('x', v >= 0 ? x(v) + 4 : x(v) - 4).attr('text-anchor', v >= 0 ? 'start' : 'end').attr('y', yy + bh - 3).attr('font-size', 10.5).attr('fill', 'var(--color-fg-muted)').text(fmt(v));
       });
     });
   }
 
-  dash.draw('regime-chart', (el) => {
-    const d = dash.data('regime');
-    if (d.status !== 'ok') { el.replaceChildren(); el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
-    el.classList.remove('dash-skeleton');
-    const rows = d.data.map((r) => ({ label: r.regime, values: [num(r.prior), num(r.final)] }));
-    hbars(el, rows, [{ name: 'Prior (code)', color: 'var(--cds-chart-muted)' }, { name: 'Final (after strategist)', color: dash.colors[0] }],
-      { fmt: (v) => f1(v) + '%', rowH: 38 });
+  function gauge(svg, cx, cy, r, v) {   // semicircle, -3 (left, bearish) .. +3 (right, bullish)
+    const a = d3.scaleLinear([-3, 3], [-Math.PI / 2, Math.PI / 2]).clamp(true);
+    const arc = d3.arc().innerRadius(r - 9).outerRadius(r).cornerRadius(4);
+    [[-3, -1, 'var(--color-bad)'], [-1, 1, 'var(--color-warn)'], [1, 3, 'var(--color-ok)']].forEach(([s, e, c]) =>
+      svg.append('path').attr('transform', `translate(${cx},${cy})`).attr('d', arc({ startAngle: a(s), endAngle: a(e) })).attr('fill', c).attr('opacity', 0.28));
+    if (v === null) return;
+    svg.append('path').attr('transform', `translate(${cx},${cy})`).attr('d', arc({ startAngle: a(0), endAngle: a(v) })).attr('fill', stanceColor(v));
+    const t = a(v);
+    svg.append('line').attr('x1', cx).attr('y1', cy).attr('x2', cx + Math.sin(t) * (r - 14)).attr('y2', cy - Math.cos(t) * (r - 14)).attr('stroke', 'var(--color-fg)').attr('stroke-width', 2).attr('stroke-linecap', 'round');
+    svg.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 3).attr('fill', 'var(--color-fg)');
+  }
+
+  function ring(svg, cx, cy, r, v, color) {
+    const arc = d3.arc().innerRadius(r - 6).outerRadius(r);
+    svg.append('path').attr('transform', `translate(${cx},${cy})`).attr('d', arc({ startAngle: 0, endAngle: 2 * Math.PI })).attr('fill', 'var(--cds-chart-grid)');
+    if (v === null) return;
+    svg.append('path').attr('transform', `translate(${cx},${cy})`).attr('d', arc.cornerRadius(3)({ startAngle: 0, endAngle: 2 * Math.PI * v })).attr('fill', color);
+    svg.append('text').attr('x', cx).attr('y', cy + 4).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg)').text(d3.format('.0%')(v));
+  }
+
+  // ---------------------------------------------------------------- header
+  const fmtKpi = (r) => { const v = num(r.value); switch (r.unit) {
+    case '%': return f2(v) + '%'; case '$': return '$' + f2(v); case 'bp': return signed(v, 0) + ' bp';
+    case '$bn': return signed(v, 0); case 'x': return f1(v) + '×'; default: return f1(v); } };
+  dash.draw('kpi', (el) => { if (!ready(el, ['kpi'])) { el.textContent = '—'; return; } const r = pick(dash.data('kpi').data, el); el.textContent = r ? fmtKpi(r) : '—'; });
+  dash.draw('regime-word', (el) => { const d = dash.data('regime'); const r = d.status === 'ok' ? pick(d.data, el) : null; el.textContent = r ? f1(num(r.final)) + '%' : '—'; });
+  dash.draw('count', (el) => { const d = dash.data('ticket_counts'); el.textContent = d.status === 'ok' ? String(d.data[0][el.dataset.field]) : '—'; });
+  dash.draw('sw0', (el) => { el.style.background = C(0); });
+  dash.draw('sw1', (el) => { el.style.background = C(1); });
+  dash.draw('spark', (el) => {
+    if (!ready(el, ['series'])) { el.replaceChildren(); return; }
+    const pts = seriesRows(el.dataset.series); if (!pts.length) { el.replaceChildren(); return; }
+    const [svg, W] = svgIn(el, 34);
+    const x = d3.scaleUtc(d3.extent(pts, (p) => p.d), [2, W - 4]), y = d3.scaleLinear(d3.extent(pts, (p) => p.v), [31, 3]);
+    svg.append('path').datum(pts).attr('fill', 'none').attr('stroke', C(0)).attr('stroke-width', 1.6).attr('stroke-linejoin', 'round').attr('d', d3.line().x((p) => x(p.d)).y((p) => y(p.v)));
+    const l = pts[pts.length - 1]; svg.append('circle').attr('cx', x(l.d)).attr('cy', y(l.v)).attr('r', 2.5).attr('fill', C(0));
   });
 
-  dash.draw('vol-chart', (el) => {
-    const d = dash.data('etfs');
-    if (d.status !== 'ok') { el.replaceChildren(); el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
-    el.classList.remove('dash-skeleton');
-    const rows = d.data.filter((r) => r.vol_premium !== null && r.vol_premium !== undefined && r.vol_premium !== '')
-      .map((r) => ({ label: r.ticker, values: [num(r.vol_premium)] })).sort((a, b) => b.values[0] - a.values[0]);
-    hbars(el, rows, [{ name: 'Premium', color: dash.colors[1] }], { fmt: (v) => signed(v, 1) + ' pts', rowH: 32 });
-  });
-
-  dash.draw('agents', (el) => {
-    const d = dash.data('agents');
-    el.replaceChildren();
-    if (d.status !== 'ok') { el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
-    el.classList.remove('dash-skeleton');
-    d.data.forEach((a) => {
-      const card = document.createElement('article'); card.className = 'agent';
-      const top = document.createElement('div'); top.className = 'top';
-      const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = a.name;
-      const st = document.createElement('span'); st.className = 'st ' + (/validated|^Ran$/.test(a.status) ? 'ok' : /Waiting/.test(a.status) ? 'warn' : '');
-      st.textContent = a.status; top.append(nm, st);
-      const meta = document.createElement('span'); meta.className = 'meta'; meta.textContent = `${a.layer} · ${a.kind}`;
-      card.append(top, meta);
-      const bits = [];
-      if (a.stance_label) bits.push(a.stance_label);
-      if (num(a.stance_score) !== null) bits.push('stance ' + signed(num(a.stance_score), 1));
-      if (num(a.confidence) !== null) bits.push('confidence ' + d3.format('.0%')(num(a.confidence)));
-      if (num(a.citations) !== null) bits.push(a.citations + ' citations checked');
-      if (bits.length) { const s = document.createElement('span'); s.className = 'stance'; s.textContent = bits.join(' · '); card.append(s); }
-      const p = document.createElement('p'); p.textContent = a.summary; card.append(p);
-      if (a.findings) {
-        const ul = document.createElement('ul');
-        String(a.findings).split(' | ').forEach((f) => { const li = document.createElement('li'); li.textContent = f; ul.append(li); });
-        card.append(ul);
-      }
-      el.append(card);
+  // ---------------------------------------------------------------- pipeline flow
+  dash.draw('flow', (el) => {
+    el.replaceChildren(); if (!ready(el, ['agents'])) return;
+    const order = ['Data', 'Research desk', 'Committee', 'Implementation', 'Learning'];
+    order.forEach((layer, li) => {
+      const ags = dash.data('agents').data.filter((a) => a.layer === layer);
+      if (li) { const ar = document.createElement('span'); ar.className = 'arrow'; ar.textContent = '→'; el.append(ar); }
+      ags.forEach((a) => {
+        const n = document.createElement('span'); n.className = 'node';
+        const dot = document.createElement('i');
+        dot.style.background = /^Ran/.test(a.status) ? 'var(--color-ok)' : /Waiting/.test(a.status) ? 'var(--color-warn)' : 'var(--cds-chart-muted)';
+        const t = document.createElement('span'); t.textContent = a.name;
+        n.title = a.status; n.append(dot, t); el.append(n);
+      });
     });
   });
 
+  // ---------------------------------------------------------------- regime
+  dash.draw('quadrant', (el) => {
+    if (!ready(el, ['regime_path'])) { el.replaceChildren(); return; }
+    const rows = dash.data('regime_path').data.map((r) => ({ m: r.month, g: num(r.growth), i: num(r.inflation) }));
+    const h = 300, [svg, W] = svgIn(el, h);
+    const lim = Math.max(1, d3.max(rows, (r) => Math.max(Math.abs(r.g), Math.abs(r.i))) * 1.15);
+    const pad = 28, x = d3.scaleLinear([-lim, lim], [pad, W - 10]), y = d3.scaleLinear([-lim, lim], [h - pad, 10]);
+    const quads = [['Reflation', 0, lim, 0, lim, 1], ['Goldilocks', 0, lim, -lim, 0, 0], ['Stagflation', -lim, 0, 0, lim, 3], ['Deflationary bust', -lim, 0, -lim, 0, 2]];
+    quads.forEach(([name, x0, x1, y0, y1, ci]) => {
+      svg.append('rect').attr('x', x(x0)).attr('y', y(y1)).attr('width', x(x1) - x(x0)).attr('height', y(y0) - y(y1)).attr('fill', C(ci)).attr('opacity', 0.09);
+      svg.append('text').attr('x', x0 < 0 ? x(x0) + 8 : x(x1) - 8).attr('text-anchor', x0 < 0 ? 'start' : 'end').attr('y', y1 > 0 ? y(y1) + 16 : y(y0) - 8)
+        .attr('font-size', 12).attr('fill', C(ci)).attr('font-weight', 600).text(name);
+    });
+    svg.append('line').attr('x1', x(0)).attr('x2', x(0)).attr('y1', y(lim)).attr('y2', y(-lim)).attr('stroke', 'var(--cds-chart-axis)');
+    svg.append('line').attr('x1', x(-lim)).attr('x2', x(lim)).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--cds-chart-axis)');
+    svg.append('text').attr('x', W - 10).attr('y', h - 8).attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text('growth →');
+    svg.append('text').attr('x', pad + 4).attr('y', 22).attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text('↑ inflation');
+    const line = d3.line().curve(d3.curveCatmullRom.alpha(0.5)).x((r) => x(r.g)).y((r) => y(r.i));
+    svg.append('path').datum(rows).attr('fill', 'none').attr('stroke', C(0)).attr('stroke-width', 2.5).attr('stroke-linecap', 'round').attr('d', line);
+    const tip = tipIn(el);
+    rows.forEach((r, k) => svg.append('circle').attr('cx', x(r.g)).attr('cy', y(r.i)).attr('r', k === rows.length - 1 ? 7 : 3)
+      .attr('fill', C(0)).attr('opacity', k === rows.length - 1 ? 1 : 0.25 + 0.6 * k / rows.length).attr('stroke', 'var(--color-panel)').attr('stroke-width', k === rows.length - 1 ? 2 : 0)
+      .on('mousemove', (ev) => showTip(tip, el, ev, [d3.utcFormat('%b %Y')(parse(r.m)), `Growth ${signed(r.g, 2)}`, `Inflation ${signed(r.i, 2)}`])).on('mouseleave', () => tip.style('opacity', 0)));
+    const a = rows[0], z = rows[rows.length - 1];
+    svg.append('text').attr('x', x(a.g) + 8).attr('y', y(a.i) + 4).attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(d3.utcFormat('%b %Y')(parse(a.m)));
+    svg.append('text').attr('x', x(z.g) + 11).attr('y', y(z.i) + 4).attr('font-size', 12).attr('font-weight', 600).attr('fill', 'var(--color-fg)').text('Now');
+  });
+  const REG_C = { Goldilocks: 0, Reflation: 1, 'Deflation': 2, Stagflation: 3 };
+  dash.draw('regime-donut', (el) => {
+    if (!ready(el, ['regime'])) { el.replaceChildren(); return; }
+    const rows = dash.data('regime').data.map((r) => ({ label: r.regime, value: num(r.final), color: C(REG_C[r.regime] ?? 4) }));
+    const top = rows.reduce((a, b) => (b.value > a.value ? b : a));
+    donut(el, rows, { fmt: (v) => f1(v) + '%', center: f1(top.value) + '%', sub: top.label });
+  });
+  dash.draw('regime-bars', (el) => {
+    if (!ready(el, ['regime'])) { el.replaceChildren(); return; }
+    hbars(el, dash.data('regime').data.map((r) => ({ label: r.regime, values: [num(r.prior), num(r.final)] })),
+      [{ name: 'Prior (code)', color: 'var(--cds-chart-muted)' }, { name: 'Final', color: (v, r) => C(REG_C[r.label] ?? 4) }], { fmt: (v) => f1(v) + '%', rowH: 28 });
+  });
+
+  // ---------------------------------------------------------------- desks
+  const DESK_CHART = {
+    liquidity: { specs: [{ series: 'net_liquidity', short: 'Net liquidity' }], fmt: (v) => '$' + comma(Math.round(v)) + 'bn', area: true },
+    rates_credit: { specs: [{ series: 'fed_funds', short: 'Fed funds' }, { series: 't2y', short: '2y' }, { series: 't10y', short: '10y' }, { series: 'real10y', short: 'Real 10y' }], fmt: (v) => f2(v) + '%' },
+    macro_cycle: { specs: [{ series: 'cpi_yoy', short: 'CPI y/y' }, { series: 'core_cpi_3m', short: 'Core 3m ann.' }, { series: 'core_cpi_yoy', short: 'Core y/y' }], fmt: (v) => f1(v) + '%', snake: true },
+    geopolitics: { specs: [{ series: 'gpr_30d', short: 'GPR 30d' }], fmt: (v) => f1(v), area: true },
+    supply_chain: { specs: [{ series: 'gscpi', short: 'GSCPI' }], fmt: (v) => f2(v), refs: [{ y: 0 }], snake: true, area: true },
+    energy: { specs: [{ series: 'brent', short: 'Brent' }, { series: 'wti', short: 'WTI' }], fmt: (v) => '$' + f1(v) },
+    metals: { specs: [{ series: 'px_GLD', short: 'GLD' }, { series: 'px_SLV', short: 'SLV' }], fmt: (v) => f1(v), refs: [{ y: 100 }] },
+    us_equity: { specs: [{ series: 'px_SPY', short: 'SPY' }, { series: 'px_QQQ', short: 'QQQ' }, { series: 'px_IWM', short: 'IWM' }], fmt: (v) => f1(v), refs: [{ y: 100 }] },
+    intl_equity: { specs: [{ series: 'px_EEM', short: 'EEM' }, { series: 'px_FEZ', short: 'FEZ' }, { series: 'px_EWJ', short: 'EWJ' }, { series: 'px_FXI', short: 'FXI' }], fmt: (v) => f1(v), refs: [{ y: 100 }] },
+    valuation: { specs: [{ series: 'cape', short: 'CAPE' }], fmt: (v) => f1(v), snake: true, area: true, nowPoint: 'cape_now' },
+    volatility: { specs: [{ series: 'ovx', short: 'OVX' }, { series: 'vxeem', short: 'VXEEM' }, { series: 'vix', short: 'VIX' }], fmt: (v) => f1(v) },
+  };
+  dash.draw('desks', (el) => {
+    el.replaceChildren();
+    if (!ready(el, ['agents', 'series'])) return;
+    dash.data('agents').data.filter((a) => a.layer === 'Research desk').forEach((a) => {
+      const sc = num(a.stance_score), conf = num(a.confidence);
+      const card = document.createElement('article'); card.className = 'desk'; card.style.borderTopColor = stanceColor(sc);
+      const hd = document.createElement('div'); hd.className = 'hd';
+      const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = a.name;
+      const st = document.createElement('span'); st.className = 'st'; st.textContent = a.status; hd.append(nm, st); card.append(hd);
+      const meters = document.createElement('div'); meters.className = 'meters'; card.append(meters);
+      const gEl = document.createElement('div'); const rEl = document.createElement('div'); const lab = document.createElement('div'); lab.className = 'lbl';
+      meters.append(gEl, rEl, lab);
+      const gs = d3.select(gEl).append('svg').attr('width', '100%').attr('viewBox', '0 0 120 70'); gauge(gs, 60, 62, 52, sc);
+      gs.append('text').attr('x', 60).attr('y', 44).attr('text-anchor', 'middle').attr('font-size', 12).attr('font-weight', 600).attr('fill', stanceColor(sc)).text(sc === null ? '' : signed(sc, 1));
+      const rs = d3.select(rEl).append('svg').attr('width', '100%').attr('viewBox', '0 0 64 64'); ring(rs, 32, 32, 28, conf, C(0));
+      const s1 = document.createElement('strong'); s1.textContent = a.stance_label; const s2 = document.createElement('span');
+      s2.textContent = `stance gauge · confidence ring · ${a.citations} citations checked`; lab.append(s1, s2);
+      const mini = document.createElement('div'); mini.className = 'mini'; card.append(mini);
+      const p = document.createElement('p'); p.textContent = a.summary; card.append(p);
+      if (a.findings) { const ul = document.createElement('ul'); String(a.findings).split(' | ').forEach((f) => { const li = document.createElement('li'); li.textContent = f; ul.append(li); }); card.append(ul); }
+      el.append(card);
+      const spec = DESK_CHART[a.agent_id];
+      if (spec) {
+        const pts = spec.nowPoint ? seriesRows(spec.nowPoint) : [];
+        lineChart(mini, spec.specs, { height: 140, fmt: spec.fmt, area: spec.area, snake: spec.snake, refs: spec.refs,
+          points: pts.map((q) => ({ d: q.d, v: q.v, label: 'Now ' + f1(q.v), color: 'var(--color-bad)' })) });
+      }
+    });
+  });
+
+  // ---------------------------------------------------------------- sleeves
+  dash.draw('sleeve-bars', (el) => {
+    if (!ready(el, ['sleeves'])) { el.replaceChildren(); return; }
+    hbars(el, dash.data('sleeves').data.map((r) => ({ label: r.sleeve, values: [num(r.playbook_score), num(r.after_modifiers)] })),
+      [{ name: 'Playbook', color: 'var(--cds-chart-muted)' }, { name: 'After modifiers', color: (v) => (v >= 0.5 ? 'var(--color-ok)' : v <= -0.5 ? 'var(--color-bad)' : C(0)) }],
+      { fmt: (v) => signed(v, 2), refs: [-0.5, 0.5], rowH: 30 });
+  });
+  dash.draw('budget-donut', (el) => {
+    if (!ready(el, ['budget'])) { el.replaceChildren(); return; }
+    donut(el, dash.data('budget').data.map((r, i) => ({ label: r.sleeve, value: num(r.risk_budget), color: C(i) })), { fmt: (v) => v + '%', center: '100%', sub: 'stress budget' });
+  });
+
+  // ---------------------------------------------------------------- trades
+  dash.draw('credit-bars', (el) => {
+    if (!ready(el, ['tickets'])) { el.replaceChildren(); return; }
+    hbars(el, dash.data('tickets').data.map((t) => ({ label: `${t.id} ${t.instrument}`, values: [num(t.model_credit_pct), num(t.ibkr_credit_pct)] })),
+      [{ name: 'Model', color: 'var(--cds-chart-muted)' }, { name: 'IBKR', color: (v) => (v >= 10 ? C(1) : 'var(--color-bad)') }], { fmt: (v) => f1(v) + '%', refs: [10, 20], rowH: 32, allLabels: true });
+  });
+  dash.draw('iv-bars', (el) => {
+    if (!ready(el, ['ivs'])) { el.replaceChildren(); return; }
+    hbars(el, dash.data('ivs').data.map((r) => ({ label: r.underlying, values: [num(r.hv30), num(r.iv), num(r.iv_pct_52w)] })),
+      [{ name: 'Realized 30d', color: 'var(--cds-chart-muted)' }, { name: 'Implied', color: C(2) }, { name: 'IV rank 52w', color: C(4) }], { fmt: (v) => f1(v), rowH: 44, allLabels: true });
+  });
+  dash.draw('payoffs', (el) => {
+    el.replaceChildren();
+    if (!ready(el, ['tickets'])) return;
+    dash.data('tickets').data.forEach((t) => {
+      const box = document.createElement('div'); box.className = 'pay'; el.append(box);
+      const hd = document.createElement('div'); hd.className = 'hd';
+      const a = document.createElement('span'); a.textContent = `${t.id} · ${t.instrument} ${t.structure}`;
+      const b = document.createElement('span'); b.className = t.passes_10pct === 'yes' ? 'ok' : 'no'; b.textContent = t.passes_10pct === 'yes' ? 'passes checks' : 'fails a check';
+      hd.append(a, b); box.append(hd);
+      const cap = document.createElement('div'); cap.className = 'muted'; cap.textContent = t.legs; box.append(cap);
+      const ch = document.createElement('div'); ch.style.position = 'relative'; ch.style.minHeight = '120px'; box.append(ch);
+      const cr = num(t.credit), S0 = num(t.spot);
+      if (cr === null) { const m = document.createElement('div'); m.className = 'muted'; m.textContent = 'No two-sided quote before the open: re-price after 09:30 ET.'; ch.append(m); return; }
+      const ks = ['put_long', 'put_short', 'call_short', 'call_long'].map((k) => num(t[k])).filter((v) => v !== null);
+      const lo = Math.min(S0, ...ks) * 0.9, hi = Math.max(S0, ...ks) * 1.1;
+      const pl = (S) => 100 * (cr - (t.put_short !== null && num(t.put_short) !== null ? Math.max(0, num(t.put_short) - S) - Math.max(0, num(t.put_long) - S) : 0)
+        - (num(t.call_short) !== null ? Math.max(0, S - num(t.call_short)) - Math.max(0, S - num(t.call_long)) : 0));
+      const pts = d3.range(0, 121).map((k) => { const S = lo + (hi - lo) * k / 120; return { S, v: pl(S) }; });
+      const h = 120, [svg, W] = svgIn(ch, h);
+      const x = d3.scaleLinear([lo, hi], [34, W - 6]), y = d3.scaleLinear(d3.extent(pts, (p) => p.v), [h - 18, 8]).nice();
+      const clipUp = 'u' + Math.random().toString(36).slice(2), clipDn = 'd' + Math.random().toString(36).slice(2);
+      const defs = svg.append('defs');
+      defs.append('clipPath').attr('id', clipUp).append('rect').attr('x', 0).attr('y', 0).attr('width', W).attr('height', y(0));
+      defs.append('clipPath').attr('id', clipDn).append('rect').attr('x', 0).attr('y', y(0)).attr('width', W).attr('height', h);
+      const area = d3.area().x((p) => x(p.S)).y0(y(0)).y1((p) => y(p.v));
+      svg.append('path').datum(pts).attr('d', area).attr('fill', 'var(--color-ok)').attr('opacity', 0.25).attr('clip-path', `url(#${clipUp})`);
+      svg.append('path').datum(pts).attr('d', area).attr('fill', 'var(--color-bad)').attr('opacity', 0.25).attr('clip-path', `url(#${clipDn})`);
+      svg.append('path').datum(pts).attr('fill', 'none').attr('stroke', 'var(--color-fg)').attr('stroke-width', 1.6).attr('d', d3.line().x((p) => x(p.S)).y((p) => y(p.v)));
+      svg.append('line').attr('x1', 34).attr('x2', W - 6).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--cds-chart-axis)');
+      svg.append('line').attr('x1', x(S0)).attr('x2', x(S0)).attr('y1', 6).attr('y2', h - 18).attr('stroke', C(0)).attr('stroke-dasharray', '2 3');
+      svg.append('g').attr('transform', `translate(34,0)`).call(d3.axisLeft(y).ticks(3).tickFormat((v) => d3.format('$~s')(v)).tickSize(0)).call(axisStyle).call((g) => g.select('.domain').remove());
+      svg.append('g').attr('transform', `translate(0,${h - 18})`).call(d3.axisBottom(x).ticks(4).tickSizeOuter(0)).call(axisStyle);
+      const tip = tipIn(ch);
+      svg.append('rect').attr('x', 34).attr('width', Math.max(0, W - 40)).attr('height', h).attr('fill', 'transparent')
+        .on('mousemove', (ev) => { const S = x.invert(d3.pointer(ev)[0]); showTip(tip, ch, ev, [`${t.instrument} at ${f2(S)}`, `P&L ${money(pl(S))} per contract`]); })
+        .on('mouseleave', () => tip.style('opacity', 0));
+    });
+  });
+
+  // ---------------------------------------------------------------- checks
+  const OUT_C = { Pass: 'var(--color-ok)', Warning: 'var(--color-warn)', Block: 'var(--color-bad)', Decision: C(4), Answered: C(0) };
+  dash.draw('checks-donut', (el) => {
+    if (!ready(el, ['checks'])) { el.replaceChildren(); return; }
+    const k = (o) => (o.startsWith('Answered') ? 'Answered' : o);
+    const roll = d3.rollups(dash.data('checks').data, (v) => v.length, (r) => k(r.outcome));
+    donut(el, roll.map(([l, n]) => ({ label: l === 'Answered' ? 'Red team, answered' : l, value: n, color: OUT_C[l] })), { center: String(dash.data('checks').data.length), sub: 'checks' });
+  });
+  dash.draw('redteam', (el) => {
+    el.replaceChildren(); if (!ready(el, ['checks'])) return;
+    dash.data('checks').data.filter((r) => r.kind === 'Red team').forEach((r) => {
+      const d = document.createElement('div'); d.style.borderLeft = `3px solid ${C(0)}`; d.style.padding = '4px 10px'; d.style.marginBottom = '8px';
+      const q = document.createElement('div'); q.style.fontSize = 'var(--cds-font-size-caption)'; q.textContent = r.item;
+      const a = document.createElement('div'); a.className = 'muted'; a.textContent = r.outcome.replace('Answered: ', 'CIO: ');
+      d.append(q, a); el.append(d);
+    });
+  });
+
+  // ---------------------------------------------------------------- markets
+  dash.draw('heat', (el) => {
+    if (!ready(el, ['etfs'])) { el.replaceChildren(); return; }
+    const rows = dash.data('etfs').data, cols = [['ret_1m', '1m'], ['ret_3m', '3m'], ['ret_12m', '12m'], ['vs_200dma', 'vs 200d']];
+    const cellH = 18, h = 24 + rows.length * cellH;
+    const [svg, W] = svgIn(el, h);
+    const labW = 46, cw = (W - labW) / cols.length;
+    const color = d3.scaleDiverging([-30, 0, 30], (t) => d3.interpolateRgb(css(el, '--color-bad', '#c2410c'), css(el, '--color-ok', '#15803d'))(t)).clamp(true);
+    cols.forEach(([, l], j) => svg.append('text').attr('x', labW + j * cw + cw / 2).attr('y', 14).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(l));
+    const tip = tipIn(el);
+    rows.forEach((r, i) => {
+      const yy = 22 + i * cellH;
+      svg.append('text').attr('x', 0).attr('y', yy + 13).attr('font-size', 11.5).attr('fill', 'var(--color-fg)').text(r.ticker);
+      cols.forEach(([f, l], j) => {
+        const v = num(r[f]);
+        svg.append('rect').attr('x', labW + j * cw + 1).attr('y', yy).attr('width', cw - 2).attr('height', cellH - 2).attr('rx', 2).attr('fill', color(v)).attr('opacity', 0.35 + 0.65 * Math.min(1, Math.abs(v) / 30))
+          .on('mousemove', (ev) => showTip(tip, el, ev, [`${r.ticker} · ${l}`, signed(v, 1) + '%'])).on('mouseleave', () => tip.style('opacity', 0));
+        svg.append('text').attr('x', labW + j * cw + cw / 2).attr('y', yy + 12).attr('text-anchor', 'middle').attr('font-size', 10.5).attr('fill', 'var(--color-fg)').text(signed(v, 1));
+      });
+    });
+  });
+  dash.draw('rebased', (el) => {
+    if (!ready(el, ['series'])) { el.replaceChildren(); return; }
+    lineChart(el, [{ series: 'px_USO', short: 'USO' }, { series: 'px_SPY', short: 'SPY' }, { series: 'px_EEM', short: 'EEM' }, { series: 'px_GLD', short: 'GLD' }, { series: 'px_TLT', short: 'TLT' }],
+      { height: 300, fmt: (v) => f1(v), refs: [{ y: 100 }] });
+  });
+
+  // ---------------------------------------------------------------- data
+  dash.draw('source-donut', (el) => {
+    if (!ready(el, ['provenance'])) { el.replaceChildren(); return; }
+    const roll = d3.rollups(dash.data('provenance').data, (v) => v.length, (r) => r.kind).sort((a, b) => b[1] - a[1]);
+    donut(el, roll.map(([l, n], i) => ({ label: l, value: n, color: C(i) })), { center: String(dash.data('provenance').data.length), sub: 'sources' });
+  });
+
+  // ---------------------------------------------------------------- tables
   function body(name, id, cols) {
     dash.draw(name, (tb) => {
-      const d = dash.data(id);
-      tb.replaceChildren();
-      if (d.status !== 'ok') return;
-      d.data.forEach((r) => {
-        const tr = document.createElement('tr');
-        cols.forEach(([field, fmt, cls]) => {
-          const td = document.createElement('td');
-          const v = r[field];
+      const d = dash.data(id); tb.replaceChildren(); if (d.status !== 'ok') return;
+      d.data.forEach((r) => { const tr = document.createElement('tr');
+        cols.forEach(([f, fmt, cls]) => { const td = document.createElement('td'); const v = r[f];
           td.textContent = v === null || v === undefined || v === '' ? '' : fmt ? fmt(v, r) : String(v);
-          const c = typeof cls === 'function' ? cls(v, r) : cls;
-          if (c) td.className = c;
-          tr.append(td);
-        });
-        tb.append(tr);
-      });
+          const c = typeof cls === 'function' ? cls(v, r) : cls; if (c) td.className = c; tr.append(td); });
+        tb.append(tr); });
     });
   }
-  const pct = (v) => signed(num(v), 1);
   const sgn = (v) => (num(v) > 0 ? 'n pos' : num(v) < 0 ? 'n neg' : 'n');
-  body('sleeves-body', 'sleeves', [['sleeve'], ['playbook_score', (v) => signed(num(v), 2), 'n'], ['after_modifiers', (v) => signed(num(v), 2), sgn],
-    ['direction', (v) => (num(v) > 0 ? 'Bullish' : num(v) < 0 ? 'Bearish' : 'Neutral'), 'n'], ['conviction', (v) => f2(num(v)), 'n'],
-    ['action'], ['status', null, (v) => (v === 'Policy-compliant' ? 'pos' : v === 'Needs policy change' ? 'warnc' : '')]]);
-  body('tickets-body', 'tickets', [['book'], ['id'], ['instrument'], ['structure'], ['legs'], ['quantity', (v) => comma(num(v)), 'n'],
-    ['credit_total', (v) => money(num(v)), 'n'], ['max_loss_total', (v) => money(num(v)), 'n'], ['credit_pct_width', (v) => f1(num(v)) + '%', 'n'],
-    ['return_on_risk_pct', (v) => f1(num(v)) + '%', 'n'], ['status']]);
-  body('issues-body', 'issues', [['id'], ['kind'], ['item'], ['detail'], ['response', null, (v, r) => (r.severity === 'block' ? 'neg' : r.severity === 'decision' ? 'warnc' : '')]]);
-  body('etfs-body', 'etfs', [['ticker'], ['close', (v) => f2(num(v)), 'n'], ['ret_1m', pct, sgn], ['ret_3m', pct, sgn], ['ret_12m', pct, sgn],
-    ['vs_200dma', pct, sgn], ['drawdown_52w', pct, 'n'], ['rv20', (v, r) => f1(num(v)) + (r.data_flag ? ' (check)' : ''), (v, r) => (r.data_flag ? 'n warnc' : 'n')]]);
+  body('sleeves-body', 'sleeves', [['sleeve'], ['playbook_score', (v) => signed(num(v), 2), 'n'], ['after_modifiers', (v) => signed(num(v), 2), sgn], ['conviction', (v) => f2(num(v)), 'n'], ['action'],
+    ['status', null, (v) => (v === 'Policy-compliant' ? 'pos' : v === 'Needs policy change' ? 'warn' : '')]]);
+  body('tickets-body', 'tickets', [['id'], ['instrument'], ['legs'], ['short_deltas'], ['ibkr_credit_pct', (v) => f1(num(v)) + '%', (v) => (num(v) >= 10 ? 'n pos' : 'n neg')],
+    ['quantity', (v) => comma(num(v)), 'n'], ['credit_total', (v) => money(num(v)), 'n'], ['max_loss_total', (v) => money(num(v)), 'n'], ['passes_10pct', null, (v) => (v === 'yes' ? 'pos' : 'neg')], ['issues']]);
+  body('checks-body', 'checks', [['id'], ['kind'], ['item'], ['detail'], ['outcome', null, (v) => (v === 'Pass' ? 'pos' : v === 'Block' ? 'neg' : v === 'Warning' || v === 'Decision' ? 'warn' : '')]]);
   body('provenance-body', 'provenance', [['id'], ['kind'], ['last_obs'], ['age_days', (v) => comma(num(v)), 'n'], ['detail']]);
 
   const named = document.getElementById(location.hash.slice(1));

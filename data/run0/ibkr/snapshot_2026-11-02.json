@@ -1,0 +1,289 @@
+{
+ "source": "Interactive Brokers connector (claude.ai), read-only market-data tools: search_contracts, get_option_parameters, get_option_data, get_price_snapshot",
+ "fetched_at": "2026-11-02T12:15:00Z",
+ "session_note": "pre-market Monday; equity/ETF quotes REALTIME, XSP index and its options DELAYED/FROZEN_DELAYED",
+ "expiry": "2026-12-18",
+ "underlyings": {
+  "USO": {
+   "last": 163.8,
+   "bid": 163.4,
+   "ask": 163.45,
+   "status": "REALTIME",
+   "iv": 0.5386,
+   "hv30": 0.4223,
+   "iv_pctile_13w": 0.906,
+   "iv_pctile_26w": 0.651,
+   "iv_pctile_52w": 0.62
+  },
+  "EEM": {
+   "last": 62.0,
+   "bid": 61.96,
+   "ask": 62.2,
+   "status": "REALTIME",
+   "iv": 0.2685,
+   "hv30": 0.2223,
+   "iv_pctile_13w": 0.938,
+   "iv_pctile_26w": 0.548,
+   "iv_pctile_52w": 0.672
+  },
+  "XSP": {
+   "last": 758.01,
+   "status": "FROZEN_DELAYED (prior close)",
+   "iv": 0.1461,
+   "hv30": 0.1061,
+   "iv_pctile_13w": 0.953,
+   "iv_pctile_26w": 0.81,
+   "iv_pctile_52w": 0.652
+  },
+  "TLT": {
+   "last": 81.51,
+   "bid": 81.49,
+   "ask": 81.53,
+   "status": "REALTIME",
+   "iv": 0.1236,
+   "hv30": 0.1287,
+   "iv_pctile_13w": 0.625,
+   "iv_pctile_26w": 0.794,
+   "iv_pctile_52w": 0.844
+  }
+ },
+ "options": [
+  {
+   "u": "USO",
+   "right": "P",
+   "strike": 125,
+   "bid": 1.05,
+   "ask": 1.14,
+   "delta": -0.0617,
+   "oi": 3355
+  },
+  {
+   "u": "USO",
+   "right": "P",
+   "strike": 128,
+   "bid": 1.26,
+   "ask": 1.41,
+   "delta": null,
+   "oi": 551
+  },
+  {
+   "u": "USO",
+   "right": "P",
+   "strike": 130,
+   "bid": 1.45,
+   "ask": 1.61,
+   "delta": -0.0829,
+   "oi": 5958
+  },
+  {
+   "u": "USO",
+   "right": "P",
+   "strike": 135,
+   "bid": 1.99,
+   "ask": 2.23,
+   "delta": -0.1123,
+   "oi": 3384
+  },
+  {
+   "u": "USO",
+   "right": "P",
+   "strike": 138,
+   "bid": 2.45,
+   "ask": 2.67,
+   "delta": -0.1324,
+   "oi": 717
+  },
+  {
+   "u": "TLT",
+   "right": "C",
+   "strike": 85,
+   "bid": 0.45,
+   "ask": 0.47,
+   "delta": 0.2109,
+   "oi": 53803
+  },
+  {
+   "u": "TLT",
+   "right": "C",
+   "strike": 86,
+   "bid": 0.32,
+   "ask": 0.34,
+   "delta": 0.1582,
+   "oi": 64017
+  },
+  {
+   "u": "TLT",
+   "right": "C",
+   "strike": 87,
+   "bid": 0.23,
+   "ask": 0.25,
+   "delta": 0.1191,
+   "oi": 64509
+  },
+  {
+   "u": "TLT",
+   "right": "C",
+   "strike": 88,
+   "bid": 0.17,
+   "ask": 0.18,
+   "delta": 0.09,
+   "oi": 37517
+  },
+  {
+   "u": "TLT",
+   "right": "C",
+   "strike": 89,
+   "bid": 0.12,
+   "ask": 0.14,
+   "delta": 0.0682,
+   "oi": 31843
+  },
+  {
+   "u": "EEM",
+   "right": "P",
+   "strike": 52,
+   "bid": 0.21,
+   "ask": 0.67,
+   "delta": null,
+   "oi": 8514
+  },
+  {
+   "u": "EEM",
+   "right": "P",
+   "strike": 53,
+   "bid": null,
+   "ask": 1.22,
+   "delta": null,
+   "oi": 30999
+  },
+  {
+   "u": "EEM",
+   "right": "P",
+   "strike": 54,
+   "bid": 0.2,
+   "ask": 1.07,
+   "delta": null,
+   "oi": 51680
+  },
+  {
+   "u": "EEM",
+   "right": "P",
+   "strike": 55,
+   "bid": 0.4,
+   "ask": 0.88,
+   "delta": -0.1847,
+   "oi": 71655,
+   "model": 0.746
+  },
+  {
+   "u": "EEM",
+   "right": "C",
+   "strike": 69,
+   "bid": 0.07,
+   "ask": 0.41,
+   "delta": null,
+   "oi": 13520
+  },
+  {
+   "u": "EEM",
+   "right": "C",
+   "strike": 71,
+   "bid": 0.09,
+   "ask": 0.36,
+   "delta": 0.0564,
+   "oi": 2519,
+   "model": 0.129
+  },
+  {
+   "u": "EEM",
+   "right": "C",
+   "strike": 72,
+   "bid": 0.06,
+   "ask": 0.17,
+   "delta": 0.0426,
+   "oi": 32789,
+   "model": 0.094
+  },
+  {
+   "u": "XSP",
+   "right": "P",
+   "strike": 690,
+   "bid": 3.66,
+   "ask": 3.75,
+   "delta": -0.1115,
+   "oi": 830
+  },
+  {
+   "u": "XSP",
+   "right": "P",
+   "strike": 695,
+   "bid": 3.97,
+   "ask": 4.07,
+   "delta": -0.1221,
+   "oi": 807
+  },
+  {
+   "u": "XSP",
+   "right": "C",
+   "strike": 835,
+   "bid": 0.34,
+   "ask": 0.4,
+   "delta": null,
+   "oi": 237
+  },
+  {
+   "u": "XSP",
+   "right": "P",
+   "strike": 680,
+   "bid": 3.13,
+   "ask": 3.2,
+   "delta": -0.0936,
+   "oi": 534
+  },
+  {
+   "u": "XSP",
+   "right": "P",
+   "strike": 685,
+   "bid": 3.38,
+   "ask": 3.47,
+   "delta": -0.1024,
+   "oi": 839
+  },
+  {
+   "u": "XSP",
+   "right": "C",
+   "strike": 820,
+   "bid": 0.82,
+   "ask": 0.88,
+   "delta": 0.0585,
+   "oi": 1041
+  },
+  {
+   "u": "XSP",
+   "right": "C",
+   "strike": 825,
+   "bid": 0.59,
+   "ask": 0.69,
+   "delta": 0.0446,
+   "oi": 169
+  },
+  {
+   "u": "XSP",
+   "right": "C",
+   "strike": 830,
+   "bid": 0.44,
+   "ask": 0.5,
+   "delta": 0.0346,
+   "oi": 443
+  },
+  {
+   "u": "EEM",
+   "right": "C",
+   "strike": 70,
+   "bid": 0.11,
+   "ask": 0.23,
+   "delta": null,
+   "oi": 91754
+  }
+ ]
+}
