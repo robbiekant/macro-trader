@@ -69,13 +69,16 @@ for m in range(18, -1, -1):
 w("regime_path", path)
 
 # ------------------------------------------------------------------ IBKR implied vol ranks
-S = json.loads((D / "ibkr" / "snapshot_2026-11-02.json").read_text())
+S = json.loads((D / "ibkr" / "snapshot_2026-11-04.json").read_text())
+S0 = json.loads((D / "ibkr" / "snapshot_2026-11-02.json").read_text())
 w("ivs", [{"underlying": u, "iv": round(v["iv"] * 100, 1), "hv30": round(v["hv30"] * 100, 1),
            "premium": round((v["iv"] - v["hv30"]) * 100, 1), "iv_pct_52w": round(v["iv_pctile_52w"] * 100),
            "iv_pct_13w": round(v["iv_pctile_13w"] * 100), "status": v["status"]} for u, v in S["underlyings"].items()])
 
 # ------------------------------------------------------------------ tickets: model estimate vs IBKR market
-PI = json.loads((D / "proposals_ibkr.json").read_text())["tickets"]
+PI4 = {t["id"]: t for t in json.loads((D / "proposals_ibkr_2026-11-04.json").read_text())["tickets"]}
+PI2 = json.loads((D / "proposals_ibkr.json").read_text())["tickets"]
+PI = [PI4["T1"], PI4["T3"]] + [dict(t, quote_status="Nov 2 pre-market (not re-priced)") for t in PI2 if t["id"] in ("T2", "T4")]
 P1 = {t["id"]: t for t in json.loads((D / "proposals_if_policy_change.json").read_text())["tickets"]}
 SPOT = {u: v["last"] for u, v in S["underlyings"].items()}
 tk = []
@@ -91,7 +94,8 @@ for t in PI:
                "short_deltas": t["short_deltas"], "model_credit_pct": P1.get(base, {}).get("credit_pct_width"),
                "ibkr_credit_pct": t["credit_pct_width"], "credit": t["credit_per_unit"], "width": t["width"],
                "spot": SPOT[t["instrument"]], **{k: strikes.get(k) for k in ("put_short", "put_long", "call_short", "call_long")},
-               "quantity": t["quantity"], "credit_total": t["credit_total"], "max_loss_total": t["max_loss_total"],
+               "quantity": t["quantity"] if t["passes_10pct"] else 0, "credit_total": t["credit_total"] if t["passes_10pct"] else None,
+               "max_loss_total": t["max_loss_total"] if t["passes_10pct"] else None,
                "passes_20pct": "yes" if t["passes_20pct"] else "no", "passes_10pct": "yes" if t["passes_10pct"] else "no",
                "issues": t["issues"], "quote_status": t["quote_status"]})
 w("tickets", tk)
@@ -124,15 +128,15 @@ w("checks", ck)
 ag = json.loads((OUT / "agents.json").read_text())
 for a in ag:
     if a["agent_id"] == "data_steward":
-        a["summary"] += " Option quotes, Greeks and implied-vol ranks then came from Interactive Brokers (read-only market-data tools, 26 option quotes)."
+        a["summary"] += " Option quotes, Greeks and implied-vol ranks came from Interactive Brokers (read-only market-data tools): 26 quotes Monday pre-market, 10 more at Tuesday's close."
     if a["agent_id"] == "options_structurer":
         a["stance_label"] = "Re-priced on IBKR quotes"
-        a["summary"] = ("Re-priced every candidate on live IBKR quotes. Real put skew makes far out-of-the-money index spreads pay less than the model: "
-                        "XSP 9.2% and TLT 7.8% of width. USO 135/125 pays 10.1%. EEM quotes were too wide before the open to price.")
+        a["summary"] = ("Re-priced on IBKR quotes. USO fell, so the spread moved to 130/120: 12.4% of width at 13 delta with tight quotes. "
+                        "Real put skew leaves XSP at 9.2% and TLT at 7.8% of width (Monday quotes). EEM after-hours quotes were too wide to price.")
     if a["agent_id"] == "risk_manager":
-        a["stance_label"] = "Nothing tradable pre-market"
-        a["summary"] = ("Election blackout blocks entries until Nov 4. On IBKR quotes no ticket passes the current 20% minimum credit; USO 135/125 passes "
-                        "a 10% rule but one leg's bid-ask is 11% of mid before the open (limit 10%). Re-check after 09:30 ET.")
+        a["stance_label"] = "1 trade ready if rule changes"
+        a["summary"] = ("Election blackout has lifted. Under the current 20% minimum credit no ticket qualifies. USO 130/120 passes every check under "
+                        "the proposed 10% rule: credit, delta cap, quote width, size (max loss $11,382, 1.1% of NAV). Re-check at the open before any fill.")
 w("agents", ag)
 
 # ------------------------------------------------------------------ provenance: add IBKR
@@ -140,6 +144,7 @@ pv = json.loads((OUT / "provenance.json").read_text())
 pv = [p for p in pv if p["kind"] != "IBKR"]
 for u, v in S["underlyings"].items():
     n = sum(1 for o in S["options"] if o["u"] == u)
-    pv.append({"id": f"ibkr:{u}", "kind": "IBKR", "last_obs": "2026-11-02", "age_days": 0,
-               "detail": f"{v['status']}; underlying + {n} Dec-18 option quotes; fetched {S['fetched_at']}"})
+    n0 = sum(1 for o in S0["options"] if o["u"] == u)
+    pv.append({"id": f"ibkr:{u}", "kind": "IBKR", "last_obs": "2026-11-03", "age_days": 1,
+               "detail": f"{v['status']}; {n} option quotes Nov 3 close + {n0} Nov 2 pre-market; Dec-18 expiry"})
 w("provenance", pv)

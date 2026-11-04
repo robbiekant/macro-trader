@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-02",
+ "as_of": "2026-11-04",
  "nav": 1000000,
  "hurdle_ffr": 3.88,
  "tickets": [
@@ -11,8 +11,8 @@
    "entry_on_or_after": "2026-11-04",
    "expiry": "2026-12-18",
    "dte_at_entry": 44,
-   "spot_ref": 61.04,
-   "iv_used": 29.3,
+   "spot_ref": 61.11,
+   "iv_used": 31.6,
    "iv_source": "fred:VXEEMCLS (EEM 30-day implied vol)",
    "short_delta_target": 0.14,
    "width": 2,
@@ -20,34 +20,34 @@
     {
      "put_call": "P",
      "side": "sell",
-     "strike": 54.5,
-     "delta": -0.134
+     "strike": 54.0,
+     "delta": -0.13
     },
     {
      "put_call": "P",
      "side": "buy",
-     "strike": 52.5
+     "strike": 52.0
     },
     {
      "put_call": "C",
      "side": "sell",
-     "strike": 68.5,
-     "delta": 0.136
+     "strike": 69.5,
+     "delta": 0.129
     },
     {
      "put_call": "C",
      "side": "buy",
-     "strike": 70.5
+     "strike": 71.5
     }
    ],
    "quantity": 50,
-   "credit_per_unit": 0.41,
-   "credit_pct_width": 20.5,
-   "credit_total": 2051,
-   "max_loss_total": 7949,
-   "bpr_est": 7949,
-   "delta_dollars": -1656,
-   "return_on_risk_pct": 25.8,
+   "credit_per_unit": 0.4,
+   "credit_pct_width": 20.0,
+   "credit_total": 2003,
+   "max_loss_total": 7997,
+   "bpr_est": 7997,
+   "delta_dollars": -787,
+   "return_on_risk_pct": 25.0,
    "conviction": 0.45,
    "pricing": "MODEL ESTIMATE - re-price on a live chain before approval"
   }
@@ -77,10 +77,10 @@
    "rule_id": "max_loss_per_defined_risk_position_pct_nav",
    "ticket": "T3",
    "passed": true,
-   "observed": 7949,
+   "observed": 7997,
    "limit": 20000.0,
    "severity": "info",
-   "message": "T3 max loss $7,949"
+   "message": "T3 max loss $7,997"
   },
   {
    "rule_id": "naked_short_calls",
@@ -95,25 +95,25 @@
    "rule_id": "min_credit_pct_of_width",
    "ticket": "T3",
    "passed": true,
-   "observed": 20.5,
+   "observed": 20.0,
    "limit": 20.0,
    "severity": "info",
-   "message": "T3 collects 20.5% of width at 0.14 delta"
+   "message": "T3 collects 20.0% of width at 0.14 delta"
   },
   {
    "rule_id": "bpr_utilization_hard_max",
    "ticket": null,
    "passed": true,
-   "observed": 7949,
+   "observed": 7997,
    "limit": 500000.0,
    "severity": "info",
-   "message": "total buying power $7,949 (0.8% of NAV)"
+   "message": "total buying power $7,997 (0.8% of NAV)"
   },
   {
    "rule_id": "bpr_utilization_target_range",
    "ticket": null,
    "passed": false,
-   "observed": 7949,
+   "observed": 7997,
    "limit": "25-40% NAV",
    "severity": "warn",
    "message": "below target range: with defined-risk spreads the stress budget binds first (design note)"
@@ -122,28 +122,28 @@
    "rule_id": "net_beta_weighted_delta_pct_nav",
    "ticket": null,
    "passed": true,
-   "observed": -1656,
+   "observed": -787,
    "limit": "-30%..+60% NAV",
    "severity": "info",
-   "message": "net $delta about $-1,656 (not beta-weighted in Run 0)"
+   "message": "net $delta about $-787 (not beta-weighted in Run 0)"
   },
   {
    "rule_id": "stress_equity_crash_20",
    "ticket": null,
    "passed": true,
-   "observed": 7949,
+   "observed": 7997,
    "limit": 120000.0,
    "severity": "info",
-   "message": "worst case if every ticket hits max loss together: $7,949 (0.8% of NAV)"
+   "message": "worst case if every ticket hits max loss together: $7,997 (0.8% of NAV)"
   },
   {
    "rule_id": "event_blackout_ELECTION",
    "ticket": null,
-   "passed": false,
+   "passed": true,
    "observed": "2026-11-03 US midterm elections",
    "limit": "72h before: no new short-vol risk, all sleeves",
-   "severity": "block",
-   "message": "entries are blocked until 2026-11-04 09:45 ET; tickets are staged for that date"
+   "severity": "info",
+   "message": "election has passed: blackout lifted"
   },
   {
    "rule_id": "event_blackout_NFP",
@@ -158,7 +158,7 @@
    "rule_id": "vix_35_breaker",
    "ticket": null,
    "passed": true,
-   "observed": 17.2,
+   "observed": 21.15,
    "limit": 35,
    "severity": "info",
    "message": "VIX below 35: naked puts would be allowed (none proposed)"
@@ -166,18 +166,18 @@
   {
    "rule_id": "data_option_chains",
    "ticket": null,
-   "passed": false,
-   "observed": "plan not entitled (HTTP 403)",
+   "passed": true,
+   "observed": "IBKR connector quotes",
    "limit": "live chain required",
-   "severity": "warn",
-   "message": "all strikes and credits are model estimates"
+   "severity": "info",
+   "message": "model estimates here; real quotes come from IBKR (structure_ibkr.py)"
   }
  ],
  "totals": {
-  "credit": 2051,
-  "max_loss": 7949,
-  "bpr": 7949,
-  "delta_dollars": -1656
+  "credit": 2003,
+  "max_loss": 7997,
+  "bpr": 7997,
+  "delta_dollars": -787
  },
  "min_credit_pct_of_width": 0.2
 }

@@ -1,0 +1,41 @@
+{
+ "source": "Interactive Brokers connector (claude.ai), read-only market-data tools",
+ "fetched_at": "2026-11-04T01:52:00Z",
+ "expiry": "2026-12-18",
+ "tickets": [
+  {
+   "id": "T1",
+   "instrument": "USO",
+   "structure": "put credit spread",
+   "legs": "Sell 130P \u00b7 Buy 120P",
+   "short_deltas": "P 0.134",
+   "credit_per_unit": 1.245,
+   "width": 10,
+   "credit_pct_width": 12.4,
+   "quantity": 13,
+   "credit_total": 1618,
+   "max_loss_total": 11382,
+   "passes_20pct": false,
+   "passes_10pct": true,
+   "issues": "none",
+   "quote_status": "REALTIME (after-hours)"
+  },
+  {
+   "id": "T3",
+   "instrument": "EEM",
+   "structure": "iron condor",
+   "legs": "Sell 54P \u00b7 Buy 52P / Sell 67C \u00b7 Buy 68C",
+   "short_deltas": "P n/a, C n/a",
+   "credit_per_unit": 0.35,
+   "width": 2,
+   "credit_pct_width": 17.5,
+   "quantity": 0,
+   "credit_total": null,
+   "max_loss_total": null,
+   "passes_20pct": false,
+   "passes_10pct": false,
+   "issues": "P54 bid-ask 35% of mid; P52 bid-ask 46% of mid; C67 bid-ask 16% of mid; C68 bid-ask 59% of mid",
+   "quote_status": "REALTIME (after-hours)"
+  }
+ ]
+}

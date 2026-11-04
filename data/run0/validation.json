@@ -8,19 +8,19 @@
  {
   "agent_id": "rates_credit",
   "passed": true,
-  "citations_checked": 10,
+  "citations_checked": 11,
   "errors": []
  },
  {
   "agent_id": "macro_cycle",
   "passed": true,
-  "citations_checked": 10,
+  "citations_checked": 11,
   "errors": []
  },
  {
   "agent_id": "geopolitics",
   "passed": true,
-  "citations_checked": 6,
+  "citations_checked": 7,
   "errors": []
  },
  {
@@ -32,7 +32,7 @@
  {
   "agent_id": "energy",
   "passed": true,
-  "citations_checked": 13,
+  "citations_checked": 14,
   "errors": []
  },
  {
@@ -44,7 +44,7 @@
  {
   "agent_id": "us_equity",
   "passed": true,
-  "citations_checked": 9,
+  "citations_checked": 10,
   "errors": []
  },
  {
@@ -63,6 +63,18 @@
   "agent_id": "volatility",
   "passed": true,
   "citations_checked": 9,
+  "errors": []
+ },
+ {
+  "agent_id": "regime",
+  "passed": true,
+  "citations_checked": 1,
+  "errors": []
+ },
+ {
+  "agent_id": "regime",
+  "passed": true,
+  "citations_checked": 1,
   "errors": []
  },
  {

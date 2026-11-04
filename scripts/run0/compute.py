@@ -17,37 +17,54 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "data" / "run0"
-AS_OF = "2026-11-02"
+import datetime as _dt
+AS_OF = _dt.date.today().isoformat()
 
 manifest = json.loads((OUT / "manifest.json").read_text())
-PATHS = {}
-for e in manifest:            # latest successful payload per series
+PATHS: dict[str, list] = {}
+for e in manifest:            # every successful payload per series, oldest first; later payloads win on overlap
     if e["ok"]:
-        PATHS[e["series_id"]] = (e["path"], e["sha256"], e["fetched_at"])
+        PATHS.setdefault(e["series_id"], []).append((e["path"], e["sha256"], e["fetched_at"]))
 
 
 def raw(sid: str) -> bytes:
-    return gzip.decompress((ROOT / PATHS[sid][0]).read_bytes())
+    return gzip.decompress((ROOT / PATHS[sid][-1][0]).read_bytes())
+
+
+def raws(sid: str):
+    for path, _, _ in PATHS[sid]:
+        yield gzip.decompress((ROOT / path).read_bytes())
 
 
 # ---------------------------------------------------------------- loaders
 def fred(code: str) -> pd.Series:
-    obs = json.loads(raw(f"fred:{code}"))["observations"]
-    s = pd.Series({pd.Timestamp(o["date"]): float(o["value"]) for o in obs if o["value"] not in (".", "")})
+    vals = {}
+    for body in raws(f"fred:{code}"):
+        for o in json.loads(body)["observations"]:
+            if o["value"] not in (".", ""):
+                vals[pd.Timestamp(o["date"])] = float(o["value"])
+    s = pd.Series(vals)
     s.name = f"fred:{code}"
     return s.sort_index()
 
 
 def eia(code: str) -> pd.Series:
-    data = json.loads(raw(f"eia:{code}"))["response"]["data"]
-    s = pd.Series({pd.Timestamp(d["period"]): float(d["value"]) for d in data if d.get("value") is not None})
+    vals = {}
+    for body in raws(f"eia:{code}"):
+        for d in json.loads(body)["response"]["data"]:
+            if d.get("value") is not None:
+                vals[pd.Timestamp(d["period"])] = float(d["value"])
+    s = pd.Series(vals)
     s.name = f"eia:{code}"
     return s.sort_index()
 
 
 def etf(t: str) -> pd.Series:
-    res = json.loads(raw(f"massive:{t}"))["results"]
-    s = pd.Series({pd.Timestamp(r["t"], unit="ms").normalize(): float(r["c"]) for r in res})
+    vals = {}
+    for body in raws(f"massive:{t}"):
+        for r in json.loads(body).get("results", []):
+            vals[pd.Timestamp(r["t"], unit="ms").normalize()] = float(r["c"])
+    s = pd.Series(vals)
     s.name = f"massive:{t}"
     return s.sort_index()
 

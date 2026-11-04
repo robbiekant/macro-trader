@@ -15,7 +15,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -105,24 +105,57 @@ def massive_get(entries, series_id, path_and_query, ext="json"):
     return e
 
 
+def last_obs(entries: list[dict], sid: str) -> str | None:
+    """Latest observation date already stored for a series (any earlier successful payload)."""
+    best = None
+    for e in entries:
+        if e["series_id"] != sid or not e["ok"]:
+            continue
+        body = json.loads(gzip.decompress((ROOT / e["path"]).read_bytes()))
+        if sid.startswith("fred:"):
+            dates = [o["date"] for o in body.get("observations", [])]
+        elif sid.startswith("eia:"):
+            dates = [d["period"] for d in body.get("response", {}).get("data", [])]
+        elif sid.startswith("massive:"):
+            dates = [datetime.fromtimestamp(r["t"] / 1000, timezone.utc).date().isoformat() for r in body.get("results", [])]
+        else:
+            dates = []
+        if dates:
+            best = max(best or "", max(dates))
+    return best
+
+
+def since(day: str | None, back_days: int, default: str) -> str:
+    if not day:
+        return default
+    return (datetime.fromisoformat(day) - timedelta(days=back_days)).date().isoformat()
+
+
+def stored_within(entries: list[dict], sid: str, days: int) -> bool:
+    now = datetime.now(timezone.utc)
+    return any(e["series_id"] == sid and e["ok"] and now - datetime.fromisoformat(e["fetched_at"]) < timedelta(days=days) for e in entries)
+
+
 def main() -> None:
     entries = load_manifest()
     fred_key = os.environ.get("FRED_API_KEY", "")
     eia_key = os.environ.get("EIA_API_KEY", "")
 
     for s in FRED_SERIES:
+        start = since(last_obs(entries, f"fred:{s}"), 120, "2003-01-01")   # delta + revision window
         url = (f"https://api.stlouisfed.org/fred/series/observations?series_id={s}&file_type=json"
-               f"&observation_start=2003-01-01&api_key={fred_key}")
+               f"&observation_start={start}&api_key={fred_key}")
         fetch(entries, "fred", f"fred:{s}", url, "json")
         time.sleep(0.15)
 
     for s in EIA_SERIES:
-        fetch(entries, "eia", f"eia:{s}", f"https://api.eia.gov/v2/seriesid/{s}?length=600&api_key={eia_key}", "json")
+        fetch(entries, "eia", f"eia:{s}", f"https://api.eia.gov/v2/seriesid/{s}?length={12 if last_obs(entries, f'eia:{s}') else 600}&api_key={eia_key}", "json")
 
     for t in ETFS:   # owner's Massive plan allows ~5 calls/minute: pace the calls
         done = any(e["series_id"] == f"massive:{t}" and e["ok"] and e["fetched_at"][:10] == TODAY for e in entries)
+        start = since(last_obs(entries, f"massive:{t}"), 7, "2016-01-01")
         massive_get(entries, f"massive:{t}",
-                    f"/v2/aggs/ticker/{t}/range/1/day/2016-01-01/{TODAY}?adjusted=true&sort=asc&limit=50000")
+                    f"/v2/aggs/ticker/{t}/range/1/day/{start}/{TODAY}?adjusted=true&sort=asc&limit=50000")
         if not done:
             time.sleep(13)
 
@@ -133,11 +166,14 @@ def main() -> None:
                             f"/v3/snapshot/options/{u}?expiration_date={OPTION_EXPIRY}&contract_type={side}&limit=250")
 
     fetch(entries, "gpr", "gpr:daily", "https://www.matteoiacoviello.com/gpr_files/data_gpr_daily_recent.xls", "xls")
-    fetch(entries, "gpr", "gpr:monthly", "https://www.matteoiacoviello.com/gpr_files/data_gpr_export.xls", "xls")
-    fetch(entries, "nyfed", "nyfed:GSCPI",
+    if not stored_within(entries, "gpr:monthly", 25):
+        fetch(entries, "gpr", "gpr:monthly", "https://www.matteoiacoviello.com/gpr_files/data_gpr_export.xls", "xls")
+    if not stored_within(entries, "nyfed:GSCPI", 25):
+        fetch(entries, "nyfed", "nyfed:GSCPI",
           "https://www.newyorkfed.org/medialibrary/research/interactives/gscpi/downloads/gscpi_data.xlsx", "xlsx")
     # Cboe CDN and multpl/Shiller hosts are blocked by the cloud network policy; VIX3M comes from FRED (VXVCLS).
-    fetch(entries, "datahub", "datahub:sp500_pe10",
+    if not stored_within(entries, "datahub:sp500_pe10", 365):
+        fetch(entries, "datahub", "datahub:sp500_pe10",
           "https://raw.githubusercontent.com/datasets/s-and-p-500/main/data/data.csv", "csv")
 
     save_manifest(entries)

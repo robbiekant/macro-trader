@@ -51,10 +51,10 @@ NAMES = {"liquidity": "Global Liquidity & Dollar", "rates_credit": "Rates, Centr
          "volatility": "Volatility & Options Surface"}
 KIND = {"valuation": "Hybrid", "volatility": "Hybrid"}
 rows = []
-ok = sum(e["ok"] for e in MAN if e["fetched_at"][:10] == "2026-11-02")
+ok = sum(e["ok"] for e in MAN)
 rows.append({"agent_id": "data_steward", "name": "Data Steward", "layer": "Data", "kind": "Code", "status": "Ran",
              "stance_score": None, "stance_label": f"{ok} payloads stored", "confidence": None, "citations": None,
-             "summary": "Fetched FRED (49 series), EIA (4), Massive (17 ETFs), GPR, NY Fed GSCPI and CAPE history; keys read from the environment; raw payloads hashed and stored. Option chains were refused by the data plan; Cboe and CAPE sites were blocked by network settings.",
+             "summary": "Monday: full history from FRED (49 series), EIA (4), Massive (17 ETFs), GPR, NY Fed GSCPI and CAPE. Wednesday: an incremental refresh, 71 requests asking only for data newer than what was stored. Keys read from the environment; raw payloads hashed and stored.",
              "findings": ""})
 for r in REP["research"]:
     v = VAL[r["agent_id"]]
@@ -89,14 +89,14 @@ w("agents", rows)
 
 # ---------------- sleeves
 ACT = {   # CIO targets (reports.json) mapped onto playbook sleeves
-    "US equity index": (0, 0.5, "XSP iron condor, puts at or below 12 delta, size x0.6", "Needs policy change"),
-    "Intl developed equity": (-1, 0.35, "Stand aside: no implied-vol data for EFA/FEZ", "No trade"),
-    "EM equity": (0, 0.45, "EEM iron condor on rich EM premium", "Policy-compliant"),
-    "Crude oil": (1, 0.55, "USO put spread, 10 delta, defined risk", "Needs policy change"),
+    "US equity index": (0, 0.4, "Stand aside: real XSP premium about half the minimum", "No trade"),
+    "Intl developed equity": (0, 0.35, "Stand aside: neutral now, no implied-vol data for EFA/FEZ", "No trade"),
+    "EM equity": (0, 0.45, "EEM iron condor: re-price at the open (quotes too wide)", "Re-price at open"),
+    "Crude oil": (1, 0.5, "USO 130/120 put spread, 13 delta, 13 contracts", "Needs policy change"),
     "Natural gas": (0, 0.3, "Stand aside: desk bearish, playbook bullish", "No trade"),
     "Gold": (0, 0.4, "Stand aside: falling on real yields; vol too cheap to sell", "No trade"),
-    "Silver": (0, 0.3, "Stand aside: 58% off its high, spreads only", "No trade"),
-    "Treasuries (TLT)": (-1, 0.5, "TLT call spread at half size", "Needs policy change"),
+    "Silver": (0, 0.3, "Stand aside: 57% off its high, spreads only", "No trade"),
+    "Treasuries (TLT)": (-1, 0.5, "Stand aside: real TLT premium below the minimum", "No trade"),
 }
 w("sleeves", [{"sleeve": s, "playbook_score": C["playbook_blend"][s], "after_modifiers": C["after_liquidity_modifier"][s],
                "direction": ACT[s][0], "conviction": ACT[s][1], "action": ACT[s][2], "status": ACT[s][3]} for s in ACT])

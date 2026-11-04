@@ -7,9 +7,15 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-S = json.loads((ROOT / "data/run0/ibkr/snapshot_2026-11-02.json").read_text())
+import os
+SNAP = os.environ.get("SNAP", "2026-11-02")
+S = json.loads((ROOT / f"data/run0/ibkr/snapshot_{SNAP}.json").read_text())
 Q = {(o["u"], o["right"], o["strike"]): o for o in S["options"]}
 NAV, MAX_SPREAD = 1_000_000, 0.10
+CANDS_1104 = [
+    ("T1", "USO", "put credit spread", [("P", 130, 120)], {"P": 0.15}, 12000),
+    ("T3", "EEM", "iron condor", [("P", 54, 52), ("C", 67, 68)], {"P": 0.16, "C": 0.16}, 8000),
+]
 CANDS = [  # (id, underlying, structure, legs [(right, short, long)], delta caps, max-loss budget)
     ("T1", "USO", "put credit spread", [("P", 135, 125)], {"P": 0.15}, 12000),
     ("T1b", "USO", "put credit spread", [("P", 138, 128)], {"P": 0.15}, 12000),
@@ -28,7 +34,7 @@ def mid(o):
 
 
 rows = []
-for cid, u, struct, legs, caps, budget in CANDS:
+for cid, u, struct, legs, caps, budget in (CANDS_1104 if SNAP == "2026-11-04" else CANDS):
     credit, width, notes, deltas, ok_quotes, wide = 0.0, 0.0, [], [], True, []
     for right, ks, kl in legs:
         qs, ql = Q.get((u, right, ks)), Q.get((u, right, kl))
@@ -61,7 +67,7 @@ for cid, u, struct, legs, caps, budget in CANDS:
         "quote_status": S["underlyings"][u]["status"],
     })
 out = {"source": S["source"], "fetched_at": S["fetched_at"], "expiry": S["expiry"], "tickets": rows}
-(ROOT / "data/run0/proposals_ibkr.json").write_text(json.dumps(out, indent=1))
+(ROOT / ("data/run0/proposals_ibkr.json" if SNAP == "2026-11-02" else f"data/run0/proposals_ibkr_{SNAP}.json")).write_text(json.dumps(out, indent=1))
 for r in rows:
     print(r["id"], r["instrument"], r["legs"], "| cr", r["credit_per_unit"], "cr%w", r["credit_pct_width"], "| qty", r["quantity"],
           "credit$", r["credit_total"], "maxloss$", r["max_loss_total"], "| 20%:", r["passes_20pct"], "10%:", r["passes_10pct"], "|", r["issues"])

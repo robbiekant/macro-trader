@@ -1,44 +1,44 @@
 [
  {
   "sleeve": "US equity index",
-  "playbook_score": 0.065,
-  "after_modifiers": -0.435,
+  "playbook_score": 0.189,
+  "after_modifiers": -0.311,
   "direction": 0,
-  "conviction": 0.5,
-  "action": "XSP iron condor, puts at or below 12 delta, size x0.6",
-  "status": "Needs policy change"
+  "conviction": 0.4,
+  "action": "Stand aside: real XSP premium about half the minimum",
+  "status": "No trade"
  },
  {
   "sleeve": "Intl developed equity",
-  "playbook_score": -0.012,
-  "after_modifiers": -0.512,
-  "direction": -1,
+  "playbook_score": 0.103,
+  "after_modifiers": -0.397,
+  "direction": 0,
   "conviction": 0.35,
-  "action": "Stand aside: no implied-vol data for EFA/FEZ",
+  "action": "Stand aside: neutral now, no implied-vol data for EFA/FEZ",
   "status": "No trade"
  },
  {
   "sleeve": "EM equity",
-  "playbook_score": 0.429,
-  "after_modifiers": -0.071,
+  "playbook_score": 0.594,
+  "after_modifiers": 0.094,
   "direction": 0,
   "conviction": 0.45,
-  "action": "EEM iron condor on rich EM premium",
-  "status": "Policy-compliant"
+  "action": "EEM iron condor: re-price at the open (quotes too wide)",
+  "status": "Re-price at open"
  },
  {
   "sleeve": "Crude oil",
-  "playbook_score": 1.22,
-  "after_modifiers": 1.22,
+  "playbook_score": 1.252,
+  "after_modifiers": 1.252,
   "direction": 1,
-  "conviction": 0.55,
-  "action": "USO put spread, 10 delta, defined risk",
+  "conviction": 0.5,
+  "action": "USO 130/120 put spread, 13 delta, 13 contracts",
   "status": "Needs policy change"
  },
  {
   "sleeve": "Natural gas",
-  "playbook_score": 0.827,
-  "after_modifiers": 0.827,
+  "playbook_score": 0.812,
+  "after_modifiers": 0.812,
   "direction": 0,
   "conviction": 0.3,
   "action": "Stand aside: desk bearish, playbook bullish",
@@ -46,8 +46,8 @@
  },
  {
   "sleeve": "Gold",
-  "playbook_score": 1.434,
-  "after_modifiers": 1.434,
+  "playbook_score": 1.372,
+  "after_modifiers": 1.372,
   "direction": 0,
   "conviction": 0.4,
   "action": "Stand aside: falling on real yields; vol too cheap to sell",
@@ -55,20 +55,20 @@
  },
  {
   "sleeve": "Silver",
-  "playbook_score": 0.911,
-  "after_modifiers": 0.911,
+  "playbook_score": 1.017,
+  "after_modifiers": 1.017,
   "direction": 0,
   "conviction": 0.3,
-  "action": "Stand aside: 58% off its high, spreads only",
+  "action": "Stand aside: 57% off its high, spreads only",
   "status": "No trade"
  },
  {
   "sleeve": "Treasuries (TLT)",
-  "playbook_score": -1.143,
-  "after_modifiers": -1.143,
+  "playbook_score": -1.166,
+  "after_modifiers": -1.166,
   "direction": -1,
   "conviction": 0.5,
-  "action": "TLT call spread at half size",
-  "status": "Needs policy change"
+  "action": "Stand aside: real TLT premium below the minimum",
+  "status": "No trade"
  }
 ]

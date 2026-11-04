@@ -134,13 +134,15 @@ check("net_beta_weighted_delta_pct_nav", -0.30 * NAV <= delta_total <= 0.60 * NA
 crash = sum(t["max_loss_total"] for t in tickets)
 check("stress_equity_crash_20", crash <= 0.12 * NAV, crash, 0.12 * NAV, "block",
       f"worst case if every ticket hits max loss together: ${crash:,} ({crash / NAV:.1%} of NAV)")
-check("event_blackout_ELECTION", False, "2026-11-03 US midterm elections", "72h before: no new short-vol risk, all sleeves", "block",
-      "entries are blocked until 2026-11-04 09:45 ET; tickets are staged for that date")
+from datetime import date as _d
+_after = _d.today() >= _d(2026, 11, 4)
+check("event_blackout_ELECTION", _after, "2026-11-03 US midterm elections", "72h before: no new short-vol risk, all sleeves", "block",
+      "election has passed: blackout lifted" if _after else "entries are blocked until 2026-11-04 09:45 ET; tickets are staged for that date")
 check("event_blackout_NFP", True, "2026-11-06 October payrolls", "12h before: us_equity_index, rates", "warn",
       "enter XSP and TLT on Nov 4 or 5, or wait until after the release")
 check("vix_35_breaker", V["vix"] < 35, V["vix"], 35, "block", "VIX below 35: naked puts would be allowed (none proposed)")
-check("data_option_chains", False, "plan not entitled (HTTP 403)", "live chain required", "warn",
-      "all strikes and credits are model estimates")
+check("data_option_chains", True, "IBKR connector quotes", "live chain required", "warn",
+      "model estimates here; real quotes come from IBKR (structure_ibkr.py)")
 
 out = {"as_of": M["as_of"], "nav": NAV, "hurdle_ffr": M["rates"]["fed_funds_eff"], "tickets": tickets, "stand_aside": stand_aside, "policy_checks": pol,
        "totals": {"credit": sum(t["credit_total"] for t in tickets), "max_loss": crash, "bpr": bpr, "delta_dollars": delta_total}}

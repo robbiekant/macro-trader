@@ -1,26 +1,26 @@
 [
  {
   "regime": "Goldilocks",
-  "prior": 7.7,
+  "prior": 8.6,
   "adjustment": 0.0,
-  "final": 7.7
+  "final": 8.6
  },
  {
   "regime": "Reflation",
-  "prior": 54.1,
-  "adjustment": -10.0,
-  "final": 44.1
+  "prior": 54.0,
+  "adjustment": -5.0,
+  "final": 49.1
  },
  {
   "regime": "Stagflation",
-  "prior": 33.4,
-  "adjustment": 10.0,
-  "final": 43.4
+  "prior": 32.2,
+  "adjustment": 5.0,
+  "final": 37.2
  },
  {
   "regime": "Deflation",
-  "prior": 4.8,
+  "prior": 5.1,
   "adjustment": 0.0,
-  "final": 4.8
+  "final": 5.1
  }
 ]

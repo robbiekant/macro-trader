@@ -23,7 +23,7 @@
  {
   "id": "vix",
   "label": "VIX",
-  "value": 17.2,
+  "value": 21.15,
   "unit": "",
   "note": "S&P 500 30-day implied vol"
  },
@@ -44,21 +44,21 @@
  {
   "id": "t2y_minus_ff",
   "label": "2-year minus Fed funds",
-  "value": 73.0,
+  "value": 71.0,
   "unit": "bp",
   "note": "Hikes priced"
  },
  {
   "id": "real_10y",
   "label": "10-year real yield",
-  "value": 2.63,
+  "value": 2.62,
   "unit": "%",
   "note": "TIPS"
  },
  {
   "id": "gpr_pctile",
   "label": "Geopolitical risk percentile",
-  "value": 93.0,
+  "value": 90.0,
   "unit": "pct",
   "note": "30-day GPR vs 10 years"
  },
